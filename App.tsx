@@ -1,0 +1,205 @@
+/**
+ * Sample React Native App
+ * https://github.com/facebook/react-native
+ *
+ * @format
+ */
+
+import React, { useEffect, useState } from 'react';
+import { Alert, StatusBar, useColorScheme } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { MOCK_TEST_OTP, MOCK_TEST_PHONE } from './src/constants/mockAuth';
+import { AuthScreen } from './src/screens/AuthScreen';
+import { ProfileDetailsScreen } from './src/screens/ProfileDetailsScreen';
+import { HomeScreen } from './src/screens/HomeScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
+import BottomBar from './src/components/BottomBar';
+import { OnboardingScreen } from './src/screens/OnboardingScreen';
+import { SplashScreen } from './src/screens/SplashScreen';
+
+function App() {
+  const isDarkMode = useColorScheme() === 'dark';
+  const [screen, setScreen] = useState<'splash' | 'onboarding' | 'app'>('splash');
+
+  useEffect(() => {
+    const timer = setTimeout(() => setScreen('onboarding'), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <SafeAreaProvider>
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+      {screen === 'splash' && <SplashScreen />}
+      {screen === 'onboarding' && (
+        <OnboardingScreen onGetStarted={() => setScreen('app')} />
+      )}
+      {screen === 'app' && <AppContent />}
+    </SafeAreaProvider>
+  );
+}
+
+function AppContent() {
+  const [activeScreen, setActiveScreen] = useState<'phone' | 'otp'>('phone');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otp, setOtp] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [activeTab, setActiveTab] = useState<'Home' | 'Passes' | 'Live' | 'Profile'>('Home');
+  const [verified, setVerified] = useState(false);
+  const [profile, setProfile] = useState({ fullName: '', email: '' });
+
+  // Load stored auth/profile on mount
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const storedProfile = await AsyncStorage.getItem('@EverRide:profile');
+        const storedLogged = await AsyncStorage.getItem('@EverRide:isLoggedIn');
+        const storedPhone = await AsyncStorage.getItem('@EverRide:phoneNumber');
+        if (!mounted) return;
+        if (storedProfile) setProfile(JSON.parse(storedProfile));
+        if (storedPhone) setPhoneNumber(storedPhone);
+        if (storedLogged === '1') setIsLoggedIn(true);
+      } catch (e) {
+        console.warn('Failed loading stored auth', e);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const handleGetOtp = () => {
+    const normalizedPhone = phoneNumber.replace(/\D/g, '');
+
+    if (normalizedPhone.length !== 10) {
+      setErrorMessage('Enter a valid 10-digit phone number.');
+      return;
+    }
+
+    if (normalizedPhone !== MOCK_TEST_PHONE) {
+      setErrorMessage(`Use test number ${MOCK_TEST_PHONE} for mock OTP verification.`);
+      return;
+    }
+
+    setErrorMessage('');
+    setActiveScreen('otp');
+  };
+
+  const handleVerifyOtp = () => {
+    console.log('handleVerifyOtp called, otp=', otp, 'profile=', profile);
+    if (otp.length !== 6) {
+      setErrorMessage('Enter 6-digit OTP.');
+      return;
+    }
+
+    if (otp !== MOCK_TEST_OTP) {
+      setErrorMessage('Invalid OTP. Use the test OTP shown below.');
+      return;
+    }
+
+    setErrorMessage('');
+    console.log('OTP matches mock, proceeding to verified flow');
+    Alert.alert('OTP Verified', 'OTP matched. Proceeding.');
+    setVerified(true);
+
+    (async () => {
+      try {
+        await AsyncStorage.setItem('@EverRide:phoneNumber', phoneNumber || '');
+        if (profile.fullName && profile.email) {
+          await AsyncStorage.setItem('@EverRide:isLoggedIn', '1');
+          setIsLoggedIn(true);
+          setShowProfile(false);
+        } else {
+          setShowProfile(true);
+        }
+      } catch (e) {
+        console.warn('Error saving login state', e);
+      }
+    })();
+  };
+
+  const handleSaveProfile = async ({ fullName, email }: { fullName: string; email: string }) => {
+    try {
+      await AsyncStorage.setItem('@EverRide:profile', JSON.stringify({ fullName, email }));
+      await AsyncStorage.setItem('@EverRide:isLoggedIn', '1');
+    } catch (e) {
+      console.warn('Failed saving profile', e);
+    }
+    setProfile({ fullName, email });
+    setIsLoggedIn(true);
+    setShowProfile(false);
+    setVerified(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('@EverRide:profile');
+      await AsyncStorage.removeItem('@EverRide:isLoggedIn');
+      await AsyncStorage.removeItem('@EverRide:phoneNumber');
+    } catch (e) {
+      console.warn('Failed clearing storage', e);
+    }
+
+    setIsLoggedIn(false);
+    setShowProfile(false);
+    setPhoneNumber('');
+    setOtp('');
+    setActiveScreen('phone');
+    setProfile({ fullName: '', email: '' });
+    setVerified(false);
+  };
+
+  if (showProfile) {
+    return (
+      <ProfileDetailsScreen
+        phoneNumber={phoneNumber}
+        initialFullName={profile.fullName}
+        initialEmail={profile.email}
+        onClose={() => setShowProfile(false)}
+        onSave={handleSaveProfile}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  if (isLoggedIn) {
+    const renderActive = () => {
+      if (activeTab === 'Profile') {
+        return <ProfileScreen phoneNumber={phoneNumber} onViewProfile={() => setShowProfile(true)} />;
+      }
+      // default to Home for other tabs for now
+      return <HomeScreen onOpenProfile={() => setActiveTab('Profile')} />;
+    };
+
+    return (
+      <>
+        {renderActive()}
+        <BottomBar active={activeTab} onTabPress={(t) => setActiveTab(t)} activeColor="#FFD400" inactiveColor="#9B9B9B" />
+      </>
+    );
+  }
+
+  return (
+    <AuthScreen
+      mode={activeScreen}
+      phoneNumber={phoneNumber}
+      onChangePhone={setPhoneNumber}
+      onGetOtp={handleGetOtp}
+      otp={otp}
+      onChangeOtp={setOtp}
+      onBack={() => {
+        setOtp('');
+        setErrorMessage('');
+        setActiveScreen('phone');
+      }}
+      onVerify={handleVerifyOtp}
+      errorMessage={errorMessage}
+    />
+  );
+}
+
+export default App;

@@ -1,0 +1,1 @@
+export const MAPTILER_API_KEY = 'YOUR_MAPTILER_API_KEY';

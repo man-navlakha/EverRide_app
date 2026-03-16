@@ -1,0 +1,19 @@
+pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
+plugins { id("com.facebook.react.settings") }
+extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+rootProject.name = 'EverRide'
+include ':app'
+includeBuild('../node_modules/@react-native/gradle-plugin')
+
+// Ensure Gradle can resolve the local async-storage AAR packaged with the module
+dependencyResolutionManagement {
+	repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+	repositories {
+		mavenLocal()
+		maven { url("$rootDir/../node_modules/@react-native-async-storage/async-storage/android/local_repo") }
+		// JitPack for some third-party Android artifacts (e.g. Android-SpinKit)
+		maven { url("https://jitpack.io") }
+		google()
+		mavenCentral()
+	}
+}
