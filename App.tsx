@@ -18,14 +18,54 @@ import BottomBar from './src/components/BottomBar';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { SplashScreen } from './src/screens/SplashScreen';
 
+type InitialAuth = {
+  isLoggedIn: boolean;
+  phoneNumber: string;
+  profile: { fullName: string; email: string };
+};
+
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
   const [screen, setScreen] = useState<'splash' | 'onboarding' | 'app'>('splash');
+  const [splashDone, setSplashDone] = useState(false);
+  const [initialAuth, setInitialAuth] = useState<InitialAuth | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => setScreen('onboarding'), 3000);
-    return () => clearTimeout(timer);
+    let mounted = true;
+    const timer = setTimeout(() => setSplashDone(true), 3000);
+
+    (async () => {
+      let profile = { fullName: '', email: '' };
+      let isLoggedIn = false;
+      let phoneNumber = '';
+
+      try {
+        const storedProfile = await AsyncStorage.getItem('@EverRide:profile');
+        const storedLogged = await AsyncStorage.getItem('@EverRide:isLoggedIn');
+        const storedPhone = await AsyncStorage.getItem('@EverRide:phoneNumber');
+
+        if (storedProfile) profile = JSON.parse(storedProfile);
+        if (storedPhone) phoneNumber = storedPhone;
+        if (storedLogged === '1') isLoggedIn = true;
+      } catch (e) {
+        console.warn('Failed loading stored auth', e);
+      }
+
+      if (mounted) {
+        setInitialAuth({ isLoggedIn, phoneNumber, profile });
+      }
+    })();
+
+    return () => {
+      mounted = false;
+      clearTimeout(timer);
+    };
   }, []);
+
+  useEffect(() => {
+    if (!splashDone || !initialAuth) return;
+    setScreen(initialAuth.isLoggedIn ? 'app' : 'onboarding');
+  }, [splashDone, initialAuth]);
 
   return (
     <SafeAreaProvider>
@@ -34,43 +74,22 @@ function App() {
       {screen === 'onboarding' && (
         <OnboardingScreen onGetStarted={() => setScreen('app')} />
       )}
-      {screen === 'app' && <AppContent />}
+      {screen === 'app' && initialAuth && <AppContent initialAuth={initialAuth} />}
     </SafeAreaProvider>
   );
 }
 
-function AppContent() {
+function AppContent({ initialAuth }: { initialAuth: InitialAuth }) {
   const [activeScreen, setActiveScreen] = useState<'phone' | 'otp'>('phone');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState(initialAuth.phoneNumber);
   const [otp, setOtp] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(initialAuth.isLoggedIn);
   const [showProfile, setShowProfile] = useState(false);
   const [activeTab, setActiveTab] = useState<'Home' | 'Passes' | 'Live' | 'Profile'>('Home');
   const [verified, setVerified] = useState(false);
-  const [profile, setProfile] = useState({ fullName: '', email: '' });
-
-  // Load stored auth/profile on mount
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const storedProfile = await AsyncStorage.getItem('@EverRide:profile');
-        const storedLogged = await AsyncStorage.getItem('@EverRide:isLoggedIn');
-        const storedPhone = await AsyncStorage.getItem('@EverRide:phoneNumber');
-        if (!mounted) return;
-        if (storedProfile) setProfile(JSON.parse(storedProfile));
-        if (storedPhone) setPhoneNumber(storedPhone);
-        if (storedLogged === '1') setIsLoggedIn(true);
-      } catch (e) {
-        console.warn('Failed loading stored auth', e);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const [profile, setProfile] = useState(initialAuth.profile);
 
   const handleGetOtp = () => {
     const normalizedPhone = phoneNumber.replace(/\D/g, '');
@@ -169,7 +188,7 @@ function AppContent() {
   if (isLoggedIn) {
     const renderActive = () => {
       if (activeTab === 'Profile') {
-        return <ProfileScreen phoneNumber={phoneNumber} onViewProfile={() => setShowProfile(true)} />;
+        return <ProfileScreen phoneNumber={phoneNumber} fullName={profile.fullName} email={profile.email} onViewProfile={() => setShowProfile(true)} />;
       }
       // default to Home for other tabs for now
       return <HomeScreen onOpenProfile={() => setActiveTab('Profile')} />;

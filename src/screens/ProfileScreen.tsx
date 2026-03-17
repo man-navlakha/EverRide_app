@@ -2,11 +2,13 @@ import React from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 
 type Props = {
+  fullName?: string;
+  email?: string;
   phoneNumber?: string;
   onViewProfile?: () => void;
 };
 
-export function ProfileScreen({ phoneNumber = '', onViewProfile }: Props) {
+export function ProfileScreen({ fullName = '', email = '', phoneNumber = '', onViewProfile }: Props) {
   const Section = ({ children }: { children: React.ReactNode }) => (
     <View className="mb-4 rounded-lg bg-white p-4 shadow-sm">
       {children}
@@ -20,7 +22,7 @@ export function ProfileScreen({ phoneNumber = '', onViewProfile }: Props) {
           <View className="flex-row items-center mb-4">
             <View className="w-16 h-16 rounded-full bg-[#EF4444] mr-4" />
             <View>
-              <Text className="text-[#4B5563]">{phoneNumber || '9913151805'}</Text>
+              <Text className="text-[#4B5563]">{fullName || '9913151805'}</Text>
               <Text className="text-[#4B5563]">{phoneNumber || '9913151805'}</Text>
               <Pressable onPress={onViewProfile} className="mt-1">
                 <Text className="text-[#2563EB]">View Profile</Text>
