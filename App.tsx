@@ -18,6 +18,7 @@ import ProfileScreen from './src/screens/ProfileScreen';
 import BottomBar from './src/components/BottomBar';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { SplashScreen } from './src/screens/SplashScreen';
+import { ActivityScreen } from './src/screens/ActivityScreen';
 
 type InitialAuth = {
   isLoggedIn: boolean;
@@ -195,7 +196,7 @@ function AppContent({ initialAuth }: { initialAuth: InitialAuth }) {
         return <ServicesScreen />;
       }
       if (activeTab === 'Activity') {
-        return <HomeScreen onOpenProfile={() => setActiveTab('Account')} />;
+        return <ActivityScreen  />;
       }
       return <HomeScreen onOpenProfile={() => setActiveTab('Account')} />;
     };

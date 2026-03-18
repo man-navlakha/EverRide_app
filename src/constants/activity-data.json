@@ -1,0 +1,55 @@
+[
+  {
+    "type": "header",
+    "title": "Activity"
+  },
+  {
+    "type": "tabs",
+    "tabs": ["Upcoming", "Past"]
+  },
+  {
+    "type": "card",
+    "id": "1",
+    "hasMap": true,
+    "title": "Bhavna Tenament",
+    "dateTime": "22 Jan • 7:39 pm",
+    "amount": "138.75",
+    "currency": "₹"
+  },
+  {
+    "type": "card",
+    "id": "2",
+    "icon": "🛺",
+    "title": "4, Civil Hospital Rd",
+    "dateTime": "22 Jan • 5:26 pm",
+    "amount": "0.00",
+    "status": "Cancelled"
+  },
+  {
+    "type": "card",
+    "id": "3",
+    "icon": "🛺",
+    "title": "Dr. Ravindra Lodha",
+    "dateTime": "22 Jan • 4:17 pm",
+    "amount": "117.31",
+    "currency": "₹"
+  },
+  {
+    "type": "card",
+    "id": "4",
+    "icon": "🏍️",
+    "title": "Samsung M...",
+    "dateTime": "2 Jan • 1:19 pm",
+    "amount": "54.10",
+    "currency": "$"
+  },
+  {
+    "type": "card",
+    "id": "5",
+    "icon": "🚶",
+    "title": "Walked 2.3 km",
+    "dateTime": "2 Jan • 1:19 pm",
+    "amount": "0.00",
+    "currency": "₹"
+  }
+]
