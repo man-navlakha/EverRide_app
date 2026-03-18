@@ -10,20 +10,21 @@ type Props = {
 
 export function ProfileScreen({ fullName = '', email = '', phoneNumber = '', onViewProfile }: Props) {
   const Section = ({ children }: { children: React.ReactNode }) => (
-    <View className="mb-4 rounded-lg bg-white p-4 shadow-sm">
+    <View className="mb-4 rounded-lg bg-[#ffffff]/80 gap-1 border-t-2 border-[#ffffff]/80 backdrop-blur-lg p-4">
       {children}
     </View>
   );
 
   return (
-    <View className="flex-1 bg-[#F7F4EF]">
+    <View className="flex-1 bg-[#ecedff]">
       <ScrollView contentContainerStyle={{ paddingBottom: 140 }}>
         <View className="px-6 pt-6">
           <View className="flex-row items-center mb-4">
-            <View className="w-16 h-16 rounded-full bg-[#EF4444] mr-4" />
+            <View className="w-16 h-16 rounded-full bg-[#EDAB0C] mr-4" />
             <View>
-              <Text className="text-[#4B5563]">{fullName || '9913151805'}</Text>
+              <Text className="text-[#000000] text-lg font-semibold">{fullName || '9913151805'}</Text>
               <Text className="text-[#4B5563]">{phoneNumber || '9913151805'}</Text>
+              <Text className="text-[#4B5563]">{email || '9913151805'}</Text>
               <Pressable onPress={onViewProfile} className="mt-1">
                 <Text className="text-[#2563EB]">View Profile</Text>
               </Pressable>
@@ -31,7 +32,8 @@ export function ProfileScreen({ fullName = '', email = '', phoneNumber = '', onV
           </View>
 
           <Section>
-            <Pressable className="flex-row items-center justify-between py-3">
+            
+            <Pressable className="flex-row items-center justify-between">
               <View className="flex-row items-center">
                 <Text className="mr-3">🖤</Text>
                 <Text className="text-base">Favourites</Text>

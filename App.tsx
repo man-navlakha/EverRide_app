@@ -13,6 +13,7 @@ import { MOCK_TEST_OTP, MOCK_TEST_PHONE } from './src/constants/mockAuth';
 import { AuthScreen } from './src/screens/AuthScreen';
 import { ProfileDetailsScreen } from './src/screens/ProfileDetailsScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
+import { ServicesScreen } from './src/screens/ServicesScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import BottomBar from './src/components/BottomBar';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
@@ -87,7 +88,7 @@ function AppContent({ initialAuth }: { initialAuth: InitialAuth }) {
 
   const [isLoggedIn, setIsLoggedIn] = useState(initialAuth.isLoggedIn);
   const [showProfile, setShowProfile] = useState(false);
-  const [activeTab, setActiveTab] = useState<'Home' | 'Passes' | 'Live' | 'Profile'>('Home');
+  const [activeTab, setActiveTab] = useState<'Home' | 'Services' | 'Activity' | 'Account'>('Home');
   const [verified, setVerified] = useState(false);
   const [profile, setProfile] = useState(initialAuth.profile);
 
@@ -187,17 +188,22 @@ function AppContent({ initialAuth }: { initialAuth: InitialAuth }) {
 
   if (isLoggedIn) {
     const renderActive = () => {
-      if (activeTab === 'Profile') {
+      if (activeTab === 'Account') {
         return <ProfileScreen phoneNumber={phoneNumber} fullName={profile.fullName} email={profile.email} onViewProfile={() => setShowProfile(true)} />;
       }
-      // default to Home for other tabs for now
-      return <HomeScreen onOpenProfile={() => setActiveTab('Profile')} />;
+      if (activeTab === 'Services') {
+        return <ServicesScreen />;
+      }
+      if (activeTab === 'Activity') {
+        return <HomeScreen onOpenProfile={() => setActiveTab('Account')} />;
+      }
+      return <HomeScreen onOpenProfile={() => setActiveTab('Account')} />;
     };
 
     return (
       <>
         {renderActive()}
-        <BottomBar active={activeTab} onTabPress={(t) => setActiveTab(t)} activeColor="#FFD400" inactiveColor="#9B9B9B" />
+        <BottomBar active={activeTab} onTabPress={(t) => setActiveTab(t)} activeColor="#EDAB0C" inactiveColor="#0f0f0f" />
       </>
     );
   }

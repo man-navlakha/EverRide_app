@@ -40,11 +40,11 @@ export function HomeScreen({ onOpenProfile }: Props) {
   }, [query]);
 
   return (
-    <View className="flex-1 bg-[#F3EEE4]">
-      <View className="px-4 pt-5 pb-3 flex-row items-center justify-between border-b border-[#ECE7DD] bg-[#F3EEE4]">
+    <View className="flex-1 bg-[#ecedff]">
+      <View className="px-4 pt-5 pb-3 flex-row items-center justify-between border-b border-[#ffffff] bg-[#ecedff]">
         <View className="flex-row items-center">
           <Image source={require('../assets/logo.png')} style={{ width: 34, height: 34 }} resizeMode="contain" />
-          <Text className="ml-2 text-[#1E3A8A] font-syne-bold text-[22px]">EverRide</Text>
+          <Text className="ml-2 text-black font-syne-bold text-[22px]">EVERRIDE</Text>
         </View>
 
         <Pressable onPress={onOpenProfile} className="w-10 h-10 rounded-full bg-white items-center justify-center">
@@ -62,8 +62,8 @@ export function HomeScreen({ onOpenProfile }: Props) {
             </View>
           </View>
 
-          <View className="bg-[#F2EFEA] rounded-2xl px-4 py-3 flex-row items-center mt-1 mb-4">
-            <View className="w-10 h-10 rounded-xl bg-[#1E3A8A] items-center justify-center">
+          <View className="backdrop-blur-lg bg-[#ffffff] shadow-2xl border-t border-[#ffffff]/80 rounded-2xl px-4 py-3 flex-row items-center mt-1 mb-4">
+            <View className="w-10 h-10 rounded-xl items-center justify-center">
               <Text className="text-white text-[16px]">📍</Text>
             </View>
 
@@ -72,10 +72,10 @@ export function HomeScreen({ onOpenProfile }: Props) {
               onChangeText={setQuery}
               placeholder="Enter pickup location"
               placeholderTextColor="#9CA3AF"
-              className="flex-1 ml-3 text-[#111827] font-poppins-medium text-[14px]"
+              className="flex-1 ml-3 text-[#111827] bg-[#ffffff] font-poppins-medium text-[14px]"
             />
 
-            <Pressable className="w-9 h-9 rounded-xl bg-[#F4BE2A] items-center justify-center">
+            <Pressable className="w-9 h-9 rounded-xl items-center justify-center">
               <Text className="text-[#1F2937]">↗</Text>
             </Pressable>
           </View>
@@ -124,7 +124,7 @@ export function HomeScreen({ onOpenProfile }: Props) {
           </View>
 
           <View className="flex-row justify-between mb-3">
-            <View className="w-[48.5%] rounded-3xl bg-[#EFEDE8] p-4">
+            <View className="w-[48.5%] rounded-3xl backdrop-blur-lg bg-[#ffffff] shadow-2xl border-t border-[#ffffff]/80  p-4">
               <View className="w-12 h-12 rounded-2xl bg-[#7C9A14] items-center justify-center mb-4">
                 <Text className="text-[22px]">🚌</Text>
               </View>
@@ -132,7 +132,7 @@ export function HomeScreen({ onOpenProfile }: Props) {
               <Text className="text-[#7C9A14] text-[12px] leading-[16px] font-poppins-semibold">Eco-friendly</Text>
             </View>
 
-            <View className="w-[48.5%] rounded-3xl bg-[#EFEDE8] p-4">
+            <View className="w-[48.5%] rounded-3xl backdrop-blur-lg bg-[#ffffff] border-t border-[#ffffff]/80  p-4">
               <View className="w-12 h-12 rounded-2xl bg-[#1E3A8A] items-center justify-center mb-4">
                 <Text className="text-[22px]">🚇</Text>
               </View>
@@ -142,7 +142,7 @@ export function HomeScreen({ onOpenProfile }: Props) {
           </View>
 
           <View className="flex-row justify-between">
-            <View className="w-[48.5%] rounded-3xl bg-[#EFEDE8] p-4">
+            <View className="w-[48.5%] rounded-3xl backdrop-blur-lg bg-[#ffffff] border-t border-[#ffffff]/80  p-4">
               <View className="w-12 h-12 rounded-2xl bg-[#F4BE2A] items-center justify-center mb-4">
                 <Text className="text-[22px]">🛺</Text>
               </View>
@@ -150,7 +150,7 @@ export function HomeScreen({ onOpenProfile }: Props) {
               <Text className="text-[#D69E0A] text-[12px] leading-[16px] font-poppins-semibold">Door to door</Text>
             </View>
 
-            <View className="w-[48.5%] rounded-3xl bg-[#EFEDE8] p-4">
+            <View className="w-[48.5%] rounded-3xl backdrop-blur-lg bg-[#ffffff] border-t border-[#ffffff]/80  p-4">
               <View className="w-12 h-12 rounded-2xl bg-[#3AA6C8] items-center justify-center mb-4">
                 <Text className="text-[22px]">🔁</Text>
               </View>
