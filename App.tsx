@@ -19,12 +19,30 @@ import BottomBar from './src/components/BottomBar';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { SplashScreen } from './src/screens/SplashScreen';
 import { ActivityScreen } from './src/screens/ActivityScreen';
+import PickupScreen from './src/screens/PickupScreen';
+import AboutUsScreen from './src/screens/AboutUsScreen';
+import FavouritesScreen from './src/screens/FavouritesScreen';
+import HelpSupportScreen from './src/screens/HelpSupportScreen';
+import MyRidesScreen from './src/screens/MyRidesScreen';
+import ComingSoonScreen from './src/screens/ComingSoonScreen';
 
 type InitialAuth = {
   isLoggedIn: boolean;
   phoneNumber: string;
   profile: { fullName: string; email: string };
 };
+
+type AccountScreen =
+  | 'profile'
+  | 'about'
+  | 'favourites'
+  | 'help-support'
+  | 'my-rides'
+  | 'preferences'
+  | 'transit-preferences'
+  | 'share-with-friends'
+  | 'safety'
+  | 'app-language';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -89,6 +107,9 @@ function AppContent({ initialAuth }: { initialAuth: InitialAuth }) {
 
   const [isLoggedIn, setIsLoggedIn] = useState(initialAuth.isLoggedIn);
   const [showProfile, setShowProfile] = useState(false);
+  const [showPickup, setShowPickup] = useState(false);
+  const [accountScreen, setAccountScreen] = useState<AccountScreen>('profile');
+  const [selectedPickup, setSelectedPickup] = useState<{ label: string; center?: number[] } | null>(null);
   const [activeTab, setActiveTab] = useState<'Home' | 'Services' | 'Activity' | 'Account'>('Home');
   const [verified, setVerified] = useState(false);
   const [profile, setProfile] = useState(initialAuth.profile);
@@ -172,6 +193,7 @@ function AppContent({ initialAuth }: { initialAuth: InitialAuth }) {
     setActiveScreen('phone');
     setProfile({ fullName: '', email: '' });
     setVerified(false);
+    setAccountScreen('profile');
   };
 
   if (showProfile) {
@@ -190,7 +212,90 @@ function AppContent({ initialAuth }: { initialAuth: InitialAuth }) {
   if (isLoggedIn) {
     const renderActive = () => {
       if (activeTab === 'Account') {
-        return <ProfileScreen phoneNumber={phoneNumber} fullName={profile.fullName} email={profile.email} onViewProfile={() => setShowProfile(true)} />;
+        if (accountScreen === 'help-support') {
+          return <HelpSupportScreen onBack={() => setAccountScreen('profile')} />;
+        }
+
+        if (accountScreen === 'favourites') {
+          return <FavouritesScreen onBack={() => setAccountScreen('profile')} />;
+        }
+
+        if (accountScreen === 'about') {
+          return <AboutUsScreen onBack={() => setAccountScreen('profile')} />;
+        }
+
+        if (accountScreen === 'my-rides') {
+          return <MyRidesScreen onBack={() => setAccountScreen('profile')} />;
+        }
+
+        if (accountScreen === 'preferences') {
+          return (
+            <ComingSoonScreen
+              title="Preferences"
+              description="Personalized ride settings and smart defaults will be available soon."
+              onBack={() => setAccountScreen('profile')}
+            />
+          );
+        }
+
+        if (accountScreen === 'transit-preferences') {
+          return (
+            <ComingSoonScreen
+              title="Transit Preferences"
+              description="Choose your preferred transit modes and route priorities in an upcoming update."
+              onBack={() => setAccountScreen('profile')}
+            />
+          );
+        }
+
+        if (accountScreen === 'share-with-friends') {
+          return (
+            <ComingSoonScreen
+              title="Share with Friends"
+              description="Invite friends, share ride links, and earn referral rewards soon."
+              onBack={() => setAccountScreen('profile')}
+            />
+          );
+        }
+
+        if (accountScreen === 'safety') {
+          return (
+            <ComingSoonScreen
+              title="Safety"
+              description="Emergency tools, trip sharing, and rider safety controls are coming soon."
+              onBack={() => setAccountScreen('profile')}
+            />
+          );
+        }
+
+        if (accountScreen === 'app-language') {
+          return (
+            <ComingSoonScreen
+              title="App Language"
+              description="Multi-language support and language preferences will be available soon."
+              onBack={() => setAccountScreen('profile')}
+            />
+          );
+        }
+
+        return (
+          <ProfileScreen
+            phoneNumber={phoneNumber}
+            fullName={profile.fullName}
+            email={profile.email}
+            onViewProfile={() => setShowProfile(true)}
+            onOpenAboutUs={() => setAccountScreen('about')}
+            onOpenFavourites={() => setAccountScreen('favourites')}
+            onOpenHelpSupport={() => setAccountScreen('help-support')}
+            onOpenMyRides={() => setAccountScreen('my-rides')}
+            onOpenPreferences={() => setAccountScreen('preferences')}
+            onOpenTransitPreferences={() => setAccountScreen('transit-preferences')}
+            onOpenShareWithFriends={() => setAccountScreen('share-with-friends')}
+            onOpenSafety={() => setAccountScreen('safety')}
+            onOpenAppLanguage={() => setAccountScreen('app-language')}
+            onLogout={handleLogout}
+          />
+        );
       }
       if (activeTab === 'Services') {
         return <ServicesScreen />;
@@ -198,13 +303,35 @@ function AppContent({ initialAuth }: { initialAuth: InitialAuth }) {
       if (activeTab === 'Activity') {
         return <ActivityScreen  />;
       }
-      return <HomeScreen onOpenProfile={() => setActiveTab('Account')} />;
+      return (
+        <HomeScreen
+          onOpenProfile={() => setActiveTab('Account')}
+          onOpenPickup={(p) => {
+            setSelectedPickup(p);
+            setShowPickup(true);
+          }}
+        />
+      );
     };
+
+    if (showPickup) {
+      return <PickupScreen onClose={() => setShowPickup(false)} selectedPickup={selectedPickup} />;
+    }
 
     return (
       <>
         {renderActive()}
-        <BottomBar active={activeTab} onTabPress={(t) => setActiveTab(t)} activeColor="#EDAB0C" inactiveColor="#0f0f0f" />
+        <BottomBar
+          active={activeTab}
+          onTabPress={(t) => {
+            setActiveTab(t);
+            if (t !== 'Account') {
+              setAccountScreen('profile');
+            }
+          }}
+          activeColor="#233F89"
+          inactiveColor="#7c7c7c"
+        />
       </>
     );
   }

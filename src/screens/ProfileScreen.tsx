@@ -1,14 +1,39 @@
 import React from 'react';
-import { View, Text, Pressable, ScrollView } from 'react-native';
+import { View, Text, Pressable, ScrollView, Image } from 'react-native';
 
 type Props = {
   fullName?: string;
   email?: string;
   phoneNumber?: string;
   onViewProfile?: () => void;
+  onOpenAboutUs?: () => void;
+  onOpenFavourites?: () => void;
+  onOpenHelpSupport?: () => void;
+  onOpenPreferences?: () => void;
+  onOpenTransitPreferences?: () => void;
+  onOpenShareWithFriends?: () => void;
+  onOpenMyRides?: () => void;
+  onOpenSafety?: () => void;
+  onOpenAppLanguage?: () => void;
+  onLogout?: () => void;
 };
 
-export function ProfileScreen({ fullName = '', email = '', phoneNumber = '', onViewProfile }: Props) {
+export function ProfileScreen({
+  fullName = '',
+  email = '',
+  phoneNumber = '',
+  onViewProfile,
+  onOpenAboutUs,
+  onOpenFavourites,
+  onOpenHelpSupport,
+  onOpenPreferences,
+  onOpenTransitPreferences,
+  onOpenShareWithFriends,
+  onOpenMyRides,
+  onOpenSafety,
+  onOpenAppLanguage,
+  onLogout,
+}: Props) {
   const Section = ({ children }: { children: React.ReactNode }) => (
     <View className="mb-4 rounded-lg bg-[#ffffff]/80 gap-1 border-t-2 border-[#ffffff]/80 backdrop-blur-lg p-4">
       {children}
@@ -20,7 +45,13 @@ export function ProfileScreen({ fullName = '', email = '', phoneNumber = '', onV
       <ScrollView contentContainerStyle={{ paddingBottom: 140 }}>
         <View className="px-6 pt-6">
           <View className="flex-row items-center mb-4">
-            <View className="w-16 h-16 rounded-full bg-[#EDAB0C] mr-4" />
+            <View className="w-16 h-16 flex-row items-center justify-center rounded-full bg-[#EDAB0C] mr-4" >
+              <Image
+                source={require('../assets/logo.png')}
+                style={{ width: 84, height: 84, tintColor: '#FFFFFF', opacity: 0.35, marginBottom: -20 }}
+                resizeMode="contain"
+              />
+            </View>
             <View>
               <Text className="text-[#000000] text-lg font-semibold">{fullName || '9913151805'}</Text>
               <Text className="text-[#4B5563]">{phoneNumber || '9913151805'}</Text>
@@ -33,7 +64,7 @@ export function ProfileScreen({ fullName = '', email = '', phoneNumber = '', onV
 
           <Section>
             
-            <Pressable className="flex-row items-center justify-between">
+            <Pressable onPress={onOpenFavourites} className="flex-row items-center justify-between">
               <View className="flex-row items-center">
                 <Text className="mr-3">🖤</Text>
                 <Text className="text-base">Favourites</Text>
@@ -41,7 +72,7 @@ export function ProfileScreen({ fullName = '', email = '', phoneNumber = '', onV
               <Text>›</Text>
             </Pressable>
             <View className="h-[2px] bg-[#F3F4F6]" />
-            <Pressable className="flex-row items-center justify-between py-3">
+            <Pressable onPress={onOpenPreferences} className="flex-row items-center justify-between py-3">
               <View className="flex-row items-center">
                 <Text className="mr-3">⚙️</Text>
                 <Text className="text-base">Preferences</Text>
@@ -49,7 +80,7 @@ export function ProfileScreen({ fullName = '', email = '', phoneNumber = '', onV
               <Text>›</Text>
             </Pressable>
             <View className="h-[2px] bg-[#F3F4F6]" />
-            <Pressable className="flex-row items-center justify-between py-3">
+            <Pressable onPress={onOpenTransitPreferences} className="flex-row items-center justify-between py-3">
               <View className="flex-row items-center">
                 <Text className="mr-3">🚆</Text>
                 <Text className="text-base">Transit Preferences</Text>
@@ -59,7 +90,7 @@ export function ProfileScreen({ fullName = '', email = '', phoneNumber = '', onV
           </Section>
 
           <Section>
-            <Pressable className="flex-row items-center justify-between py-3">
+            <Pressable onPress={onOpenShareWithFriends} className="flex-row items-center justify-between py-3">
               <View className="flex-row items-center">
                 <Text className="mr-3">↪️</Text>
                 <Text className="text-base">Share with Friends</Text>
@@ -67,7 +98,7 @@ export function ProfileScreen({ fullName = '', email = '', phoneNumber = '', onV
               <Text>›</Text>
             </Pressable>
             <View className="h-[2px] bg-[#F3F4F6]" />
-            <Pressable className="flex-row items-center justify-between py-3">
+            <Pressable onPress={onOpenMyRides} className="flex-row items-center justify-between py-3">
               <View className="flex-row items-center">
                 <Text className="mr-3">🧾</Text>
                 <Text className="text-base">My Rides</Text>
@@ -75,7 +106,7 @@ export function ProfileScreen({ fullName = '', email = '', phoneNumber = '', onV
               <Text>›</Text>
             </Pressable>
             <View className="h-[2px] bg-[#F3F4F6]" />
-            <Pressable className="flex-row items-center justify-between py-3">
+            <Pressable onPress={onOpenHelpSupport} className="flex-row items-center justify-between py-3">
               <View className="flex-row items-center">
                 <Text className="mr-3">🎧</Text>
                 <Text className="text-base">Help and Support</Text>
@@ -83,7 +114,7 @@ export function ProfileScreen({ fullName = '', email = '', phoneNumber = '', onV
               <Text>›</Text>
             </Pressable>
             <View className="h-[2px] bg-[#F3F4F6]" />
-            <Pressable className="flex-row items-center justify-between py-3">
+            <Pressable onPress={onOpenSafety} className="flex-row items-center justify-between py-3">
               <View className="flex-row items-center">
                 <Text className="mr-3">🔒</Text>
                 <Text className="text-base">Safety</Text>
@@ -93,7 +124,7 @@ export function ProfileScreen({ fullName = '', email = '', phoneNumber = '', onV
           </Section>
 
           <Section>
-            <Pressable className="flex-row items-center justify-between py-3">
+            <Pressable onPress={onOpenAboutUs} className="flex-row items-center justify-between py-3">
               <View className="flex-row items-center">
                 <Text className="mr-3">ℹ️</Text>
                 <Text className="text-base">About Us</Text>
@@ -101,7 +132,7 @@ export function ProfileScreen({ fullName = '', email = '', phoneNumber = '', onV
               <Text>›</Text>
             </Pressable>
             <View className="h-[2px] bg-[#F3F4F6]" />
-            <Pressable className="flex-row items-center justify-between py-3">
+            <Pressable onPress={onOpenAppLanguage} className="flex-row items-center justify-between py-3">
               <View className="flex-row items-center">
                 <Text className="mr-3">🄰</Text>
                 <Text className="text-base">App Language</Text>
@@ -109,7 +140,7 @@ export function ProfileScreen({ fullName = '', email = '', phoneNumber = '', onV
               <Text>›</Text>
             </Pressable>
             <View className="h-[2px] bg-[#F3F4F6]" />
-            <Pressable className="flex-row items-center justify-between py-3">
+            <Pressable onPress={onLogout} className="flex-row items-center justify-between py-3">
               <View className="flex-row items-center">
                 <Text className="mr-3">🚪</Text>
                 <Text className="text-base">Logout</Text>
@@ -117,10 +148,21 @@ export function ProfileScreen({ fullName = '', email = '', phoneNumber = '', onV
               <Text>›</Text>
             </Pressable>
           </Section>
+
+          
         </View>
+      <View pointerEvents="none" className="absolute bottom-20 my-6 left-0 right-0 items-center justify-center">
+        <Image
+          source={require('../assets/logo.png')}
+          style={{ width: 82, height: 82, tintColor: '#000000', opacity: 0.08 }}
+          resizeMode="contain"
+        />
+        <Text className="text-[#9CA3AF] text-[11px] mt-1 font-poppins-medium">EverRide</Text>
+      </View>
       </ScrollView>
 
       {/* BottomBar rendered by App when logged in */}
+   
     </View>
   );
 }

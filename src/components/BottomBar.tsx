@@ -75,7 +75,7 @@ export function BottomBar({ active = 'Home', onTabPress, activeColor = '#EDAB0C'
   return (
     <View
       onLayout={(event) => setBarWidth(event.nativeEvent.layout.width)}
-      className="absolute left-0 right-0 bottom-0 backdrop-blur-lg bg-[#ecedff] border-t border-[#ffffff]/80 h-[82px] pb-3 shadow-lg flex-row items-stretch"
+      className="absolute left-0 right-0 bottom-0 backdrop-blur-lg bg-[#ecedff] border-t-2  border-[#ffffff]/80 h-[82px] pb-3 shadow-lg flex-row items-stretch"
     >
       <Animated.View
         pointerEvents="none"

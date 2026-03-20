@@ -1,6 +1,5 @@
-import React from 'react';
-import { View, Text, ScrollView, Pressable, Image } from 'react-native';
-import activityData from '../constants/activity-data.json';
+import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, Pressable, Image, ActivityIndicator, Platform } from 'react-native';
 
 // Define types for our SDUI components
 interface HeaderProps {
@@ -23,6 +22,7 @@ interface CardProps {
 
 interface JsonComponent {
   type: 'header' | 'tabs' | 'card';
+  id?: string | number;
   title?: string;
   tabs?: string[];
   hasMap?: boolean;
@@ -110,11 +110,64 @@ const JsonRenderer = ({ json }: { json: JsonComponent }) => {
 };
 
 export function ActivityScreen() {
+  const [activityData, setActivityData] = useState<JsonComponent[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchData = async () => {
+      const remoteUrl = 'http://10.0.2.2:3000/v1/home/page/activity';
+      const localUrl = Platform.OS === 'android' ? 'http://10.0.2.2:3000/v1/home/page/activity' : 'http://localhost:3000/v1/home/page/activity';
+      try {
+        // try remote first
+        const res = await fetch(remoteUrl);
+        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+        const json = await res.json();
+        const items = Array.isArray(json) ? json : json?.data ?? json?.items ?? [];
+        if (mounted) setActivityData(items as JsonComponent[]);
+      } catch (firstErr) {
+        // on network failure try local development server (useful when running emulator)
+        try {
+          const res2 = await fetch(localUrl);
+          if (!res2.ok) throw new Error(`${res2.status} ${res2.statusText}`);
+          const json2 = await res2.json();
+          const items2 = Array.isArray(json2) ? json2 : json2?.data ?? json2?.items ?? [];
+          if (mounted) setActivityData(items2 as JsonComponent[]);
+        } catch (secondErr: any) {
+          if (mounted) setError(`Remote: ${String(firstErr)}; Local: ${String(secondErr)}`);
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+    fetchData();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-[#ecedff]">
+        <ActivityIndicator size="large" color="#233F89" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center bg-[#ecedff]">
+        <Text className="text-red-500">Failed to load activity: {error}</Text>
+      </View>
+    );
+  }
+
   return (
     <View className="flex-1 bg-[#ecedff]">
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
-        {activityData.map((item, index) => (
-          <JsonRenderer key={index} json={item as JsonComponent} />
+        {(activityData ?? []).map((item, index) => (
+          <JsonRenderer key={(item && (item.id ?? index)) as any} json={item as JsonComponent} />
         ))}
       </ScrollView>
     </View>

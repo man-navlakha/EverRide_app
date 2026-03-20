@@ -1,33 +1,84 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Pressable, ScrollView, TextInput, Image } from 'react-native';
-import { MAPTILER_API_KEY } from '../constants/maptiler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MAPPLS_CLIENT_ID, MAPPLS_CLIENT_SECRET } from '../constants/mappls';
+import { searchMapplsPlaces, type MapplsSuggestion } from '../services/mapplsPlaces';
+
+type PickupInfo = { label: string; center?: number[] };
+
+type ResultItem = {
+  id: string;
+  place_name?: string;
+  text?: string;
+  center?: number[];
+  type?: string;
+  placeAddress?: string;
+  placeName?: string;
+  alternateName?: string;
+  eLoc?: string;
+  suggester?: string;
+};
 
 type Props = {
   onOpenProfile: () => void;
+  onOpenPickup?: (place: PickupInfo) => void;
 };
 
-export function HomeScreen({ onOpenProfile }: Props) {
+export function HomeScreen({ onOpenProfile, onOpenPickup }: Props) {
+  const RECENT_SEARCHES_KEY = '@EverRide:recentPickupSearches';
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<Array<{ id: string; place_name?: string; text?: string }>>([]);
+  const [results, setResults] = useState<ResultItem[]>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [isPickupFocused, setIsPickupFocused] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const stored = await AsyncStorage.getItem(RECENT_SEARCHES_KEY);
+        if (!stored) return;
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setRecentSearches(parsed.filter((item) => typeof item === 'string').slice(0, 12));
+        }
+      } catch {}
+    })();
+  }, []);
 
   useEffect(() => {
     const trimmed = query.trim();
     if (trimmed.length < 3) {
       setResults([]);
+      setFetchError(null);
       return;
     }
 
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
+        setFetchError(null);
+        if (!MAPPLS_CLIENT_ID || !MAPPLS_CLIENT_SECRET) {
+          setResults([]);
+          setFetchError('Missing Mappls client credentials in src/constants/mappls.ts');
+          return;
+        }
+
         setIsSearching(true);
-        const url = `https://api.maptiler.com/geocoding/${encodeURIComponent(trimmed)}.json?key=${MAPTILER_API_KEY}&autocomplete=true&limit=5`;
-        const response = await fetch(url, { signal: controller.signal });
-        const data = await response.json();
-        setResults(Array.isArray(data?.features) ? data.features : []);
-      } catch {
+        const items = (await searchMapplsPlaces(trimmed, controller.signal)) as MapplsSuggestion[] as ResultItem[];
+
+        if (items.length > 0) {
+          setResults(items);
+        } else {
+          setResults([]);
+          setFetchError('No results');
+        }
+      } catch (err) {
+        if ((err as any)?.name === 'AbortError') return;
+        console.warn('Geocoding error', err);
         setResults([]);
+        const message = err instanceof Error ? err.message : 'Network error';
+        setFetchError(message);
       } finally {
         setIsSearching(false);
       }
@@ -70,6 +121,7 @@ export function HomeScreen({ onOpenProfile }: Props) {
             <TextInput
               value={query}
               onChangeText={setQuery}
+              onFocus={() => setIsPickupFocused(true)}
               placeholder="Enter pickup location"
               placeholderTextColor="#9CA3AF"
               className="flex-1 ml-3 text-[#111827] bg-[#ffffff] font-poppins-medium text-[14px]"
@@ -82,20 +134,54 @@ export function HomeScreen({ onOpenProfile }: Props) {
 
           {isSearching ? <Text className="text-[#6B7280] mb-2">Searching...</Text> : null}
 
-          {results.length > 0 ? (
+          {!isSearching && fetchError ? (
+            <Text className="text-[#EF4444] mb-2">{fetchError}</Text>
+          ) : null}
+
+          {(results.length > 0 || (isPickupFocused && query.trim().length < 3 && recentSearches.length > 0)) ? (
             <View className="mb-4 bg-white rounded-xl overflow-hidden">
-              {results.map((item) => {
+              {(results.length > 0
+                ? results
+                : recentSearches.map((label, idx) => ({ id: `recent-${idx}-${label}`, place_name: label, placeName: label, placeAddress: 'Recent search' as string } as ResultItem))).map((item) => {
                 const label = item.place_name ?? item.text ?? 'Unknown';
+                const center = item.center;
+                const title = item.placeName ?? label;
+                const subtitle = item.placeAddress ?? label;
                 return (
                   <Pressable
                     key={item.id}
                     onPress={() => {
+                      setIsPickupFocused(false);
                       setQuery(label);
                       setResults([]);
+                      setRecentSearches((prev) => {
+                        const next = [label, ...prev.filter((itemValue) => itemValue !== label)].slice(0, 12);
+                        AsyncStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(next)).catch(() => {});
+                        return next;
+                      });
+                      if (onOpenPickup) onOpenPickup({ label, center });
                     }}
-                    className="px-4 py-3 border-b border-[#E5E7EB]"
+                    className="px-4 py-3 border-b border-[#E5E7EB] bg-white"
                   >
-                    <Text className="text-[#111827]">{label}</Text>
+                    <View className="flex-row items-start justify-between">
+                      <View className="flex-1 pr-3">
+                        <Text numberOfLines={1} className="text-[#111827] font-poppins-semibold text-[14px]">{title}</Text>
+                        <Text numberOfLines={1} className="text-[#6B7280] text-[12px] mt-0.5">{subtitle}</Text>
+                        {item.alternateName ? (
+                          <Text numberOfLines={1} className="text-[#9CA3AF] text-[11px] mt-0.5">Also known as {item.alternateName}</Text>
+                        ) : null}
+                      </View>
+                      <View className="items-end">
+                        {item.type ? (
+                          <View className="px-2 py-1 rounded-full bg-[#EFF6FF] border border-[#DBEAFE]">
+                            <Text className="text-[#1E3A8A] text-[10px] font-poppins-semibold">{item.type}</Text>
+                          </View>
+                        ) : null}
+                        {item.eLoc ? (
+                          <Text className="text-[#9CA3AF] text-[10px] mt-1">{item.eLoc}</Text>
+                        ) : null}
+                      </View>
+                    </View>
                   </Pressable>
                 );
               })}

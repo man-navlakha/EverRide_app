@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View, Image } from 'react-native';
 
 const slides = [
   {
@@ -116,6 +116,14 @@ export function OnboardingScreen({ onGetStarted }: Props) {
             Skip
           </Text>
         </Pressable>
+      </View>
+
+      <View className="absolute top-24 left-0 right-0 z-10 items-center">
+        <Image
+          source={require('../assets/logo.png')}
+          style={{ width: 42, height: 42, tintColor: '#FFFFFF', opacity: 0.9 }}
+          resizeMode="contain"
+        />
       </View>
 
       {/* ── Illustration ── */}

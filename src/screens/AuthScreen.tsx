@@ -1,4 +1,4 @@
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View, Image } from 'react-native';
 import { MOCK_TEST_OTP, MOCK_TEST_PHONE } from '../constants/mockAuth';
 
 type AuthScreenProps = {
@@ -31,13 +31,20 @@ export function AuthScreen({
    
       <View className="flex-1 px-6 pt-14">
         <View className="flex-row items-center justify-between">
-          <View>
-            <Text className="text-2xl font-syne-bold tracking-[1px] text-[#1C1F2A]">
-              EVERRIDE
-            </Text>
-            <Text className="mt-1 font-raleway-medium text-[15px] text-[#6B7280]">
-              Every ride, on time
-            </Text>
+          <View className="flex-row items-center">
+            <Image
+              source={require('../assets/logo.png')}
+              style={{ width: 36, height: 36 }}
+              resizeMode="contain"
+            />
+            <View className="ml-2">
+              <Text className="text-2xl font-syne-bold tracking-[1px] text-[#1C1F2A]">
+                EVERRIDE
+              </Text>
+              <Text className="mt-1 font-raleway-medium text-[15px] text-[#6B7280]">
+                Every ride, on time
+              </Text>
+            </View>
           </View>
        
         </View>
