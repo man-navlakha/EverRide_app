@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Alert, StatusBar, useColorScheme } from 'react-native';
+import { Alert, BackHandler, Platform, StatusBar, useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { MOCK_TEST_OTP, MOCK_TEST_PHONE } from './src/constants/mockAuth';
@@ -20,6 +20,7 @@ import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { SplashScreen } from './src/screens/SplashScreen';
 import { ActivityScreen } from './src/screens/ActivityScreen';
 import PickupScreen from './src/screens/PickupScreen';
+import MultiTransportScreen from './src/screens/MultiTransportScreen';
 import AboutUsScreen from './src/screens/AboutUsScreen';
 import FavouritesScreen from './src/screens/FavouritesScreen';
 import HelpSupportScreen from './src/screens/HelpSupportScreen';
@@ -108,11 +109,69 @@ function AppContent({ initialAuth }: { initialAuth: InitialAuth }) {
   const [isLoggedIn, setIsLoggedIn] = useState(initialAuth.isLoggedIn);
   const [showProfile, setShowProfile] = useState(false);
   const [showPickup, setShowPickup] = useState(false);
+  const [showMultiTransport, setShowMultiTransport] = useState(false);
   const [accountScreen, setAccountScreen] = useState<AccountScreen>('profile');
   const [selectedPickup, setSelectedPickup] = useState<{ label: string; center?: number[] } | null>(null);
   const [activeTab, setActiveTab] = useState<'Home' | 'Services' | 'Activity' | 'Account'>('Home');
   const [verified, setVerified] = useState(false);
   const [profile, setProfile] = useState(initialAuth.profile);
+
+  useEffect(() => {
+    if (Platform.OS !== 'android') {
+      return;
+    }
+
+    const onBackPress = () => {
+      if (!isLoggedIn) {
+        if (activeScreen === 'otp') {
+          setOtp('');
+          setErrorMessage('');
+          setActiveScreen('phone');
+          return true;
+        }
+        return false;
+      }
+
+      if (showProfile) {
+        setShowProfile(false);
+        return true;
+      }
+
+      if (showMultiTransport) {
+        setShowMultiTransport(false);
+        return true;
+      }
+
+      if (showPickup) {
+        setShowPickup(false);
+        return true;
+      }
+
+      if (activeTab === 'Account' && accountScreen !== 'profile') {
+        setAccountScreen('profile');
+        return true;
+      }
+
+      if (activeTab !== 'Home') {
+        setActiveTab('Home');
+        setAccountScreen('profile');
+        return true;
+      }
+
+      return false;
+    };
+
+    const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => subscription.remove();
+  }, [
+    activeScreen,
+    accountScreen,
+    activeTab,
+    isLoggedIn,
+    showMultiTransport,
+    showPickup,
+    showProfile,
+  ]);
 
   const handleGetOtp = () => {
     const normalizedPhone = phoneNumber.replace(/\D/g, '');
@@ -302,7 +361,14 @@ function AppContent({ initialAuth }: { initialAuth: InitialAuth }) {
           <ServicesScreen
             onOpenProfile={() => setActiveTab('Account')}
             onOpenPickup={(p) => {
+              const isMultimode = p.label.toLowerCase().includes('multimode');
+              if (isMultimode) {
+                setShowPickup(false);
+                setShowMultiTransport(true);
+                return;
+              }
               setSelectedPickup(p);
+              setShowMultiTransport(false);
               setShowPickup(true);
             }}
           />
@@ -316,12 +382,23 @@ function AppContent({ initialAuth }: { initialAuth: InitialAuth }) {
           onOpenProfile={() => setActiveTab('Account')}
           onOpenServices={() => setActiveTab('Services')}
           onOpenPickup={(p) => {
+            const isMultimode = p.label.toLowerCase().includes('multimode');
+            if (isMultimode) {
+              setShowPickup(false);
+              setShowMultiTransport(true);
+              return;
+            }
             setSelectedPickup(p);
+            setShowMultiTransport(false);
             setShowPickup(true);
           }}
         />
       );
     };
+
+    if (showMultiTransport) {
+      return <MultiTransportScreen onClose={() => setShowMultiTransport(false)} />;
+    }
 
     if (showPickup) {
       return <PickupScreen onClose={() => setShowPickup(false)} selectedPickup={selectedPickup} />;

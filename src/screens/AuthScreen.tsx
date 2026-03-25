@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Pressable, Text, TextInput, View, Image } from 'react-native';
 import { MOCK_TEST_OTP, MOCK_TEST_PHONE } from '../constants/mockAuth';
 
@@ -25,6 +26,19 @@ export function AuthScreen({
   errorMessage,
 }: AuthScreenProps) {
   const isOtp = mode === 'otp';
+  const otpInputRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    if (!isOtp) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      otpInputRef.current?.focus();
+    }, 120);
+
+    return () => clearTimeout(timer);
+  }, [isOtp]);
 
   return (
     <View className="flex-1 bg-[#ecedff]">
@@ -134,26 +148,33 @@ export function AuthScreen({
           </>
         ) : (
           <>
-            <View className="mb-2 flex-row justify-between gap-2">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <View
-                  key={index}
-                  className="h-12 flex-1 items-center justify-center rounded-xl border border-[#DBEAFE] bg-[#ffffff]">
-                  <Text className="font-syne-semibold text-[18px] text-[#1E3A8A]">
-                    {otp[index] ?? ''}
-                  </Text>
+            <Pressable onPress={() => otpInputRef.current?.focus()}>
+              <View className="relative mb-2">
+                <View className="flex-row justify-between gap-2">
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <View
+                      key={index}
+                      className="h-12 flex-1 items-center justify-center rounded-xl border border-[#DBEAFE] bg-[#ffffff]">
+                      <Text className="font-syne-semibold text-[18px] text-[#1E3A8A]">
+                        {otp[index] ?? ''}
+                      </Text>
+                    </View>
+                  ))}
                 </View>
-              ))}
-            </View>
 
-            <TextInput
-              value={otp}
-              onChangeText={value => onChangeOtp(value.replace(/\D/g, '').slice(0, 6))}
-              keyboardType="number-pad"
-              maxLength={6}
-              className="h-0 w-0 opacity-0"
-              autoFocus
-            />
+                <TextInput
+                  ref={otpInputRef}
+                  value={otp}
+                  onChangeText={value => onChangeOtp(value.replace(/\D/g, '').slice(0, 6))}
+                  keyboardType="number-pad"
+                  maxLength={6}
+                  autoFocus={isOtp}
+                  showSoftInputOnFocus
+                  blurOnSubmit={false}
+                  className="absolute inset-0 opacity-0"
+                />
+              </View>
+            </Pressable>
 
             <Text className="mt-3 text-center font-poppins-light text-[12px] text-[#6B7280]">
               OTP is sent to +91 {phoneNumber}

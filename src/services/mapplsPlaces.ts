@@ -153,3 +153,93 @@ export async function searchMapplsPlaces(query: string, signal: AbortSignal): Pr
 
   throw new Error('Mappls search failed');
 }
+
+function normalizeReverseLabel(data: any): string | null {
+  const source = Array.isArray(data?.results)
+    ? data.results[0]
+    : Array.isArray(data?.suggestedLocations)
+      ? data.suggestedLocations[0]
+      : data;
+
+  if (!source || typeof source !== 'object') return null;
+
+  const candidate =
+    source.formatted_address ??
+    source.placeAddress ??
+    source.placeName ??
+    source.locality ??
+    source.village ??
+    source.city ??
+    source.name;
+
+  return typeof candidate === 'string' && candidate.trim().length > 0 ? candidate.trim() : null;
+}
+
+export async function reverseMapplsLocationName(
+  latitude: number,
+  longitude: number,
+  signal: AbortSignal,
+): Promise<string | null> {
+  const oauthEndpoints = [
+    `https://atlas.mappls.com/api/places/reverse-geocode?lat=${encodeURIComponent(String(latitude))}&lng=${encodeURIComponent(
+      String(longitude),
+    )}`,
+    `https://atlas.mappls.com/api/places/reverse-geocode?latitude=${encodeURIComponent(
+      String(latitude),
+    )}&longitude=${encodeURIComponent(String(longitude))}`,
+  ];
+
+  const runOauthReverse = async () => {
+    const oauthToken = await getMapplsToken(signal);
+    let anyOk = false;
+
+    for (const endpoint of oauthEndpoints) {
+      const response = await fetch(endpoint, {
+        signal,
+        headers: { Authorization: `Bearer ${oauthToken}` },
+      });
+
+      if (response.status === 401) {
+        clearCachedToken();
+        return { shouldRetry: true, label: null as string | null, anyOk };
+      }
+
+      if (!response.ok) continue;
+      anyOk = true;
+      const data = await response.json();
+      const label = normalizeReverseLabel(data);
+      if (label) return { shouldRetry: false, label, anyOk };
+    }
+
+    return { shouldRetry: false, label: null as string | null, anyOk };
+  };
+
+  let oauthResult = await runOauthReverse();
+  if (oauthResult.shouldRetry) {
+    oauthResult = await runOauthReverse();
+  }
+
+  if (oauthResult.label) return oauthResult.label;
+  if (oauthResult.anyOk) return null;
+
+  if (MAPPLS_REST_KEY) {
+    const keyEndpoints = [
+      `https://atlas.mappls.com/api/places/reverse-geocode?lat=${encodeURIComponent(
+        String(latitude),
+      )}&lng=${encodeURIComponent(String(longitude))}&key=${encodeURIComponent(MAPPLS_REST_KEY)}`,
+      `https://atlas.mappls.com/api/places/reverse-geocode?latitude=${encodeURIComponent(
+        String(latitude),
+      )}&longitude=${encodeURIComponent(String(longitude))}&key=${encodeURIComponent(MAPPLS_REST_KEY)}`,
+    ];
+
+    for (const endpoint of keyEndpoints) {
+      const response = await fetch(endpoint, { signal });
+      if (!response.ok) continue;
+      const data = await response.json();
+      const label = normalizeReverseLabel(data);
+      if (label) return label;
+    }
+  }
+
+  return null;
+}

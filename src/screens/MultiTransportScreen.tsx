@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollView, Text, View, Image, Pressable, TextInput, Platform, PermissionsAndroid } from 'react-native';
+import MapLibreGL from '@maplibre/maplibre-react-native';
 import Geolocation from 'react-native-geolocation-service';
 import { MapPin, Clock3, DollarSign, Route, ArrowRight } from 'lucide-react-native';
-import { searchMapplsPlaces, type MapplsSuggestion } from '../services/mapplsPlaces';
+import { reverseMapplsLocationName, searchMapplsPlaces, type MapplsSuggestion } from '../services/mapplsPlaces';
 import { MAPPLS_CLIENT_ID, MAPPLS_CLIENT_SECRET } from '../constants/mappls';
 
 type SuggestionItem = MapplsSuggestion;
@@ -12,14 +13,56 @@ type RouteOption = {
   title: string;
   fare: string;
   duration: string;
-  modes: string[];
-  description: string;
-  color: string;
+  startTime: string;
+  endTime: string;
+  routeCodes: string[];
+  fromLabel: string;
+  frequencyLabel: string;
+  bookLabel: string;
+  timeline: {
+    time: string;
+    title: string;
+    subtitle?: string;
+    note?: string;
+    isTransit?: boolean;
+  }[];
 };
 
 type Props = {
   onClose: () => void;
 };
+
+function withRouteBend(from: number[], to: number[], bendFactor: number): number[] {
+  const midLng = (from[0] + to[0]) / 2;
+  const midLat = (from[1] + to[1]) / 2;
+  const deltaLng = to[0] - from[0];
+  const deltaLat = to[1] - from[1];
+  const length = Math.max(Math.sqrt(deltaLng * deltaLng + deltaLat * deltaLat), 0.0001);
+  const normalLng = -deltaLat / length;
+  const normalLat = deltaLng / length;
+  const offset = Math.min(0.02, length * bendFactor);
+
+  return [midLng + normalLng * offset, midLat + normalLat * offset];
+}
+
+function buildRouteLine(from: number[], to: number[], routeIndex: number): number[][] {
+  const bend = ((routeIndex % 5) - 2) * 0.12;
+  const midpoint = withRouteBend(from, to, bend);
+  return [from, midpoint, to];
+}
+
+function getBounds(from: number[], to: number[]) {
+  const minLng = Math.min(from[0], to[0]);
+  const maxLng = Math.max(from[0], to[0]);
+  const minLat = Math.min(from[1], to[1]);
+  const maxLat = Math.max(from[1], to[1]);
+  const pad = 0.01;
+
+  return {
+    ne: [maxLng + pad, maxLat + pad] as [number, number],
+    sw: [minLng - pad, minLat - pad] as [number, number],
+  };
+}
 
 function formatSuggestionLabel(item: SuggestionItem) {
   const placeName = item.placeName ?? item.place_name ?? 'Unknown';
@@ -50,55 +93,164 @@ function buildRoutes(from?: number[], to?: number[]): RouteOption[] {
   const brtsMins = Math.max(8, Math.round(km * 4));
   const metroMins = Math.max(7, Math.round(km * 3.2));
   const amtsMins = Math.max(10, Math.round(km * 4.6));
-  const bikeMins = Math.max(7, Math.round(km * 2.4));
   const autoMins = Math.max(9, Math.round(km * 2.8));
   const cabMins = Math.max(8, Math.round(km * 2.5));
 
   return [
     {
       id: 'r1',
-      title: 'Walk + BRTS + Metro + AMTS',
+      title: 'Walk + BRTS + Metro + Walk',
       fare: `₹${Math.round(14 + km * 2.2)}`,
-      duration: `${Math.round(walkStart / 75 + brtsMins + metroMins + amtsMins + walkEnd / 75)} min`,
-      modes: ['🚶', '🚌', '🚇', '🚌'],
-      description: `${Math.round(km * 10) / 10}km • Most economical`,
-      color: '#1E3A8A',
+      duration: `${Math.round(walkStart / 75 + brtsMins + metroMins + walkEnd / 75)} min`,
+      startTime: '9:48 PM',
+      endTime: '10:09 PM',
+      routeCodes: ['31/5', '31/5SH', '35'],
+      fromLabel: 'From Jawaharnagar',
+      frequencyLabel: 'every 10 min',
+      bookLabel: 'Book Auto',
+      timeline: [
+        {
+          time: '9:48 PM',
+          title: 'Dharnidhar Derasar',
+          subtitle: '120 Feet Ring Rd, Ahmedabad 380007',
+          note: `Walk • About ${Math.max(8, Math.round(walkStart / 75))} min`,
+        },
+        {
+          time: '9:58 PM',
+          title: 'Jawaharnagar',
+          subtitle: 'Board BRTS route 31/5',
+          note: `${brtsMins} min (13 stops)`,
+          isTransit: true,
+        },
+        {
+          time: '10:05 PM',
+          title: 'Gandhigram Railway Station',
+          subtitle: 'Interchange to Metro',
+          note: `${metroMins} min metro ride`,
+          isTransit: true,
+        },
+        {
+          time: '10:09 PM',
+          title: 'M.J. Library BRTS Stop',
+          subtitle: 'Destination',
+          note: `Walk • About ${Math.max(4, Math.round(walkEnd / 75))} min`,
+        },
+      ],
     },
     {
       id: 'r2',
-      title: 'Walk + Metro + Walk',
-      fare: `₹${Math.round(10 + km * 1.8)}`,
-      duration: `${Math.round(walkStart / 75 + metroMins + walkEnd / 75)} min`,
-      modes: ['🚶', '🚇', '🚶'],
-      description: `${Math.round(km * 10) / 10}km • Direct route`,
-      color: '#166534',
+      title: 'Metro + Walk',
+      fare: `₹${Math.round(18 + km * 2.3)}`,
+      duration: `${Math.round(metroMins + walkEnd / 75)} min`,
+      startTime: '9:48 PM',
+      endTime: '10:15 PM',
+      routeCodes: ['1D', '3D', '12D', '101'],
+      fromLabel: 'From Jawaharnagar',
+      frequencyLabel: 'every 8 min',
+      bookLabel: 'Book Metro',
+      timeline: [
+        {
+          time: '9:48 PM',
+          title: 'Jawaharnagar',
+          subtitle: 'Enter metro station',
+          note: `${metroMins + 6} min (9 stops)`,
+          isTransit: true,
+        },
+        {
+          time: '10:12 PM',
+          title: 'Paldi Metro',
+          subtitle: 'Exit towards destination',
+          note: `Walk • About ${Math.max(4, Math.round(walkEnd / 75))} min`,
+        },
+        {
+          time: '10:15 PM',
+          title: 'Destination',
+          subtitle: 'Arrive',
+        },
+      ],
     },
     {
       id: 'r3',
-      title: 'Auto + Metro + Walk',
-      fare: `₹${Math.round(22 + km * 3.6)}`,
-      duration: `${Math.round(autoMins * 0.45 + metroMins)} min`,
-      modes: ['🚗', '🚇', '🚶'],
-      description: `${Math.round(km * 10) / 10}km • Fastest hybrid`,
-      color: '#D97706',
+      title: 'Auto Direct',
+      fare: `₹${Math.round(35 + km * 7.2)}`,
+      duration: `${autoMins} min`,
+      startTime: '10:04 PM',
+      endTime: '10:25 PM',
+      routeCodes: ['34/4'],
+      fromLabel: 'From Jawaharnagar',
+      frequencyLabel: 'on demand',
+      bookLabel: 'Book Auto',
+      timeline: [
+        {
+          time: '10:04 PM',
+          title: 'Pickup at Jawaharnagar',
+          subtitle: 'Auto assigned nearby',
+        },
+        {
+          time: '10:25 PM',
+          title: 'Destination',
+          subtitle: 'Drop-off complete',
+          isTransit: true,
+        },
+      ],
     },
     {
       id: 'r4',
       title: 'Cab Direct',
       fare: `₹${Math.round(58 + km * 10.8)}`,
       duration: `${cabMins} min`,
-      modes: ['🚕'],
-      description: `${Math.round(km * 10) / 10}km • Direct & comfortable`,
-      color: '#1D4ED8',
+      startTime: '9:52 PM',
+      endTime: '10:13 PM',
+      routeCodes: ['Cab'],
+      fromLabel: 'From Jawaharnagar',
+      frequencyLabel: 'on demand',
+      bookLabel: 'Book Cab',
+      timeline: [
+        {
+          time: '9:52 PM',
+          title: 'Pickup at Jawaharnagar',
+          subtitle: 'Cab arrives in 3 min',
+        },
+        {
+          time: '10:13 PM',
+          title: 'Destination',
+          subtitle: 'Drop-off complete',
+          isTransit: true,
+        },
+      ],
     },
     {
       id: 'r5',
-      title: 'Auto Direct',
-      fare: `₹${Math.round(35 + km * 7.2)}`,
-      duration: `${autoMins} min`,
-      modes: ['🚗'],
-      description: `${Math.round(km * 10) / 10}km • Quick & reliable`,
-      color: '#B45309',
+      title: 'Walk + AMTS + Walk',
+      fare: `₹${Math.round(8 + km * 1.4)}`,
+      duration: `${Math.round(walkStart / 75 + amtsMins + walkEnd / 75)} min`,
+      startTime: '9:50 PM',
+      endTime: '10:18 PM',
+      routeCodes: ['2U', '9U'],
+      fromLabel: 'From Jawaharnagar',
+      frequencyLabel: 'every 12 min',
+      bookLabel: 'Book Bus',
+      timeline: [
+        {
+          time: '9:50 PM',
+          title: 'Walk to AMTS stop',
+          subtitle: 'Nearby stop',
+          note: `Walk • About ${Math.max(8, Math.round(walkStart / 75))} min`,
+        },
+        {
+          time: '9:59 PM',
+          title: 'AMTS Boarding',
+          subtitle: 'Route 2U / 9U',
+          note: `${amtsMins} min transit`,
+          isTransit: true,
+        },
+        {
+          time: '10:18 PM',
+          title: 'Destination',
+          subtitle: 'Arrive',
+          note: `Walk • About ${Math.max(4, Math.round(walkEnd / 75))} min`,
+        },
+      ],
     },
   ];
 }
@@ -119,6 +271,7 @@ export default function MultiTransportScreen({ onClose }: Props) {
   const [isSearchingDestination, setIsSearchingDestination] = useState(false);
   const [destinationError, setDestinationError] = useState<string | null>(null);
   const [isDestinationFocused, setIsDestinationFocused] = useState(false);
+  const [expandedRouteId, setExpandedRouteId] = useState<string | null>(null);
 
   // Load current location on mount
   useEffect(() => {
@@ -139,11 +292,14 @@ export default function MultiTransportScreen({ onClose }: Props) {
         }
 
         Geolocation.getCurrentPosition(
-          (position) => {
+          async (position) => {
             if (!mounted) return;
             const { latitude, longitude } = position.coords;
             setPickupCenter([longitude, latitude]);
-            setPickupLabel(`${CURRENT_LOCATION_PREFIX}`);
+            const controller = new AbortController();
+            const resolvedName = await reverseMapplsLocationName(latitude, longitude, controller.signal).catch(() => null);
+            if (!mounted) return;
+            setPickupLabel(resolvedName ?? `${CURRENT_LOCATION_PREFIX} (${latitude.toFixed(5)}, ${longitude.toFixed(5)})`);
           },
           () => {
             setFallback();
@@ -357,9 +513,94 @@ export default function MultiTransportScreen({ onClose }: Props) {
                 </View>
               )}
             </View>
+
+            <View className="rounded-2xl bg-white border border-[#E5E7EB] overflow-hidden mb-3">
+              {pickupCenter && destinationCenter ? (
+                <View className="h-44">
+                  <MapLibreGL.MapView
+                    style={{ flex: 1 }}
+                    mapStyle="https://demotiles.maplibre.org/style.json"
+                    zoomEnabled={false}
+                    scrollEnabled={false}
+                    rotateEnabled={false}
+                    pitchEnabled={false}
+                    compassEnabled={false}
+                    logoEnabled={false}
+                    attributionEnabled={false}
+                  >
+                    <MapLibreGL.Camera
+                      animationDuration={0}
+                      bounds={{
+                        ...getBounds(pickupCenter, destinationCenter),
+                        paddingTop: 20,
+                        paddingBottom: 20,
+                        paddingLeft: 20,
+                        paddingRight: 20,
+                      }}
+                    />
+
+                    <MapLibreGL.ShapeSource
+                      id="multimode-main-line"
+                      shape={{
+                        type: 'Feature',
+                        geometry: {
+                          type: 'LineString',
+                          coordinates: buildRouteLine(pickupCenter, destinationCenter, 0),
+                        },
+                        properties: {},
+                      }}
+                    >
+                      <MapLibreGL.LineLayer
+                        id="multimode-main-line-layer"
+                        style={{
+                          lineColor: '#1E3A8A',
+                          lineWidth: 4,
+                          lineOpacity: 0.85,
+                        }}
+                      />
+                    </MapLibreGL.ShapeSource>
+
+                    <MapLibreGL.ShapeSource
+                      id="multimode-main-points"
+                      shape={{
+                        type: 'FeatureCollection',
+                        features: [
+                          {
+                            type: 'Feature',
+                            properties: { pointType: 'pickup' },
+                            geometry: { type: 'Point', coordinates: pickupCenter },
+                          },
+                          {
+                            type: 'Feature',
+                            properties: { pointType: 'destination' },
+                            geometry: { type: 'Point', coordinates: destinationCenter },
+                          },
+                        ],
+                      }}
+                    >
+                      <MapLibreGL.CircleLayer
+                        id="multimode-main-points-layer"
+                        style={{
+                          circleRadius: 5,
+                          circleColor: ['match', ['get', 'pointType'], 'pickup', '#2563EB', '#16A34A'],
+                          circleStrokeWidth: 2,
+                          circleStrokeColor: '#FFFFFF',
+                        }}
+                      />
+                    </MapLibreGL.ShapeSource>
+                  </MapLibreGL.MapView>
+                </View>
+              ) : (
+                <View className="h-32 px-4 items-center justify-center">
+                  <Text className="text-[#6B7280] text-[12px] text-center">
+                    Select pickup and destination suggestions to preview route on map.
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
 
-          {/* Routes Grid */}
+          {/* Routes List */}
           {routes.length === 0 ? (
             <View className="rounded-2xl bg-white border border-[#E5E7EB] p-6 items-center">
               <Route size={32} color="#D1D5DB" />
@@ -368,55 +609,73 @@ export default function MultiTransportScreen({ onClose }: Props) {
           ) : (
             <View>
               <Text className="text-[#1E3A8A] font-syne-bold text-[18px] mb-3">{routes.length} Routes Available</Text>
-              <View className="flex-row flex-wrap justify-between">
-                {routes.map((route, index) => (
-                  <View
-                    key={route.id}
-                    className="w-[48%] bg-white rounded-2xl p-3 mb-3 border border-gray-100 shadow-sm"
-                  >
-                    {/* Badge */}
-                    <View className="absolute top-2 right-2 bg-[#F4BE2A] px-2 py-1 rounded-full">
-                      <Text className="text-[#1E3A8A] text-[10px] font-poppins-semibold">#{index + 1}</Text>
+              {routes.map((route, index) => (
+                <Pressable
+                  key={route.id}
+                  onPress={() => setExpandedRouteId((prev) => (prev === route.id ? null : route.id))}
+                  className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm"
+                >
+                  <View className="flex-row items-center justify-between">
+                    <View>
+                      <Text className="font-poppins-semibold text-[#111827] text-[16px]">{route.startTime}—{route.endTime}</Text>
+                      <Text className="text-[#6B7280] text-[11px] mt-0.5">{route.title}</Text>
                     </View>
-
-                    {/* Modes */}
-                    <View className="flex-row items-center mb-2" style={{ gap: 4 }}>
-                      {route.modes.map((mode, i) => (
-                        <Text key={i} className="text-[16px]">
-                          {mode}
-                        </Text>
-                      ))}
-                      {route.modes.length > 1 && (
-                        <View className="ml-1 flex-1 h-px bg-[#E5E7EB]" />
-                      )}
+                    <View className="items-end">
+                      <Text className="text-[#111827] text-[16px] font-poppins-semibold">{route.duration}</Text>
+                      <Text className="text-[#1E3A8A] text-[11px] mt-0.5">{route.fare}</Text>
                     </View>
-
-                    {/* Title */}
-                    <Text className="text-[#1E3A8A] font-poppins-semibold text-[12px] mb-2 leading-4">{route.title}</Text>
-
-                    {/* Duration & Fare */}
-                    <View className="flex-row items-center justify-between mb-2">
-                      <View className="flex-row items-center" style={{gap: 4}}>
-                        <Clock3 size={13} color="#6B7280" />
-                        <Text className="text-[#111827] font-poppins-semibold text-[11px]">{route.duration}</Text>
-                      </View>
-                      <View className="flex-row items-center" style={{gap: 4}}>
-                        <DollarSign size={13} color="#7C9A14" />
-                        <Text className="text-[#7C9A14] font-poppins-semibold text-[11px]">{route.fare}</Text>
-                      </View>
-                    </View>
-
-                    {/* Description */}
-                    <Text className="text-[#6B7280] text-[10px] mb-3">{route.description}</Text>
-
-                    {/* Book Button */}
-                    <Pressable className="bg-[#233F89] rounded-xl p-2 items-center justify-center flex-row" style={{gap: 4}}>
-                      <Text className="text-white font-poppins-semibold text-[11px]">Book</Text>
-                      <ArrowRight size={11} color="#ffffff" />
-                    </Pressable>
                   </View>
-                ))}
-              </View>
+
+                  <View className="flex-row items-center mt-2" style={{ gap: 6 }}>
+                    {route.routeCodes.map((code, i) => (
+                      <View key={`${route.id}-${code}-${i}`} className="px-2 py-[2px] rounded-md border border-[#D1D5DB] bg-[#F8FAFF]">
+                        <Text className="text-[10px] text-[#374151] font-poppins-medium">{code}</Text>
+                      </View>
+                    ))}
+                  </View>
+
+                  <View className="flex-row items-center justify-between mt-2">
+                    <View className="flex-row items-center" style={{ gap: 4 }}>
+                      <Clock3 size={13} color="#6B7280" />
+                      <Text className="text-[#6B7280] text-[11px]">{route.fromLabel}</Text>
+                    </View>
+                    <Text className="text-[#6B7280] text-[11px]">{route.frequencyLabel}</Text>
+                  </View>
+
+                  <Text className="text-[#1E88E5] text-[12px] mt-2 font-poppins-medium">
+                    {expandedRouteId === route.id ? 'Hide details' : 'Details'}
+                  </Text>
+
+                  {expandedRouteId === route.id ? (
+                    <View className="mt-3 border-t border-[#E5E7EB] pt-3">
+                      {route.timeline.map((step, stepIndex) => (
+                        <View key={`${route.id}-step-${stepIndex}`} className="flex-row">
+                          <View className="w-16 pr-2">
+                            <Text className="text-[#4B5563] text-[11px] font-poppins-medium">{step.time}</Text>
+                          </View>
+                          <View className="items-center mr-3">
+                            <View className={`w-2.5 h-2.5 rounded-full ${step.isTransit ? 'bg-[#1E88E5]' : 'bg-[#6B7280]'}`} />
+                            {stepIndex !== route.timeline.length - 1 ? <View className="w-[2px] flex-1 bg-[#93C5FD] mt-1" /> : null}
+                          </View>
+                          <View className="flex-1 pb-4">
+                            <Text className="text-[#111827] text-[15px] font-poppins-semibold">{step.title}</Text>
+                            {step.subtitle ? <Text className="text-[#6B7280] text-[12px] mt-0.5">{step.subtitle}</Text> : null}
+                            {step.note ? <Text className="text-[#4B5563] text-[12px] mt-1">{step.note}</Text> : null}
+                          </View>
+                        </View>
+                      ))}
+
+                      <View className="flex-row items-center justify-between mt-1">
+                        <Text className="text-[#6B7280] text-[12px]">Cost: {route.fare}</Text>
+                        <Pressable className="h-10 rounded-full bg-[#F4BE2A] items-center justify-center px-5 flex-row" style={{ gap: 6 }}>
+                          <Text className="text-[#1F2A44] text-[12px] font-poppins-semibold">{route.bookLabel}</Text>
+                          <ArrowRight size={12} color="#1F2A44" />
+                        </Pressable>
+                      </View>
+                    </View>
+                  ) : null}
+                </Pressable>
+              ))}
             </View>
           )}
         </View>
