@@ -27,7 +27,7 @@ export function AuthScreen({
   const isOtp = mode === 'otp';
 
   return (
-    <View className="flex-1 bg-[#F7F4EF]">
+    <View className="flex-1 bg-[#ecedff]">
    
       <View className="flex-1 px-6 pt-14">
         <View className="flex-row items-center justify-between">
@@ -38,7 +38,7 @@ export function AuthScreen({
               resizeMode="contain"
             />
             <View className="ml-2">
-              <Text className="text-2xl font-syne-bold tracking-[1px] text-[#1C1F2A]">
+              <Text className="text-2xl font-syne-bold tracking-[1px] text-[#1E3A8A]">
                 EVERRIDE
               </Text>
               <Text className="mt-1 font-raleway-medium text-[15px] text-[#6B7280]">
@@ -56,15 +56,15 @@ export function AuthScreen({
         <View className="mb-4 flex-row items-center justify-between">
           {isOtp ? (
             <Pressable onPress={onBack} className="h-8 w-8 items-center justify-center">
-              <Text className="font-syne-semibold text-[18px] text-[#1C1F2A]">←</Text>
+              <Text className="font-syne-semibold text-[18px] text-[#1E3A8A]">←</Text>
             </Pressable>
           ) : (
             <View className="h-8 w-8" />
           )}
-          <Text className="font-syne-bold text-[28px] text-[#1C1F2A]">
+          <Text className="font-syne-bold text-[28px] text-[#1E3A8A]">
             {isOtp ? 'OTP Verification' : 'Sign in / Sign up'}
           </Text>
-          <View className="rounded-full border border-[#D7EFE6] bg-[#ECFDF3] px-3 py-1">
+          <View className="rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1">
            
           </View>
         </View>
@@ -73,11 +73,11 @@ export function AuthScreen({
           <>
             <View className="mb-4">
              
-              <View className="flex-row items-center rounded-2xl border border-[#E7E1D6] bg-[#FFFCF7] px-3 py-3">
-                <View className="mr-3 rounded-lg bg-[#F2E8DC] px-2 py-1">
+              <View className="flex-row items-center rounded-2xl border border-[#DBEAFE] bg-[#ffffff] px-3 py-3">
+                <View className="mr-3 rounded-lg bg-[#EFF6FF] px-2 py-1">
                   
                 </View>
-                <Text className="mr-2 font-poppins-regular text-[16px] text-[#4B5563]">
+                <Text className="mr-2 font-poppins-regular text-[16px] text-[#1E3A8A]">
                   +91
                 </Text>
                 <TextInput
@@ -103,7 +103,7 @@ export function AuthScreen({
             <Pressable
               onPress={onGetOtp}
               className={`h-14 items-center justify-center rounded-2xl ${
-                phoneNumber.length === 10 ? 'bg-[#0F766E]' : 'bg-[#D9D6D1]'
+                phoneNumber.length === 10 ? 'bg-[#1E3A8A]' : 'bg-[#C7D2FE]'
               }`}>
               <Text
                 className={`font-poppins-semibold text-[16px] ${
@@ -117,17 +117,17 @@ export function AuthScreen({
               <Text className="font-poppins-light text-sm text-[#6B7280]">
                 By continuing you agree to our Terms
               </Text>
-              <Text className="font-poppins-medium text-sm text-[#0F766E]">Help</Text>
+              <Text className="font-poppins-medium text-sm text-[#EAAE1F]">Help</Text>
             </View>
 
-            <View className="mt-5 rounded-xl border border-[#F1E6D8] bg-[#FFF7ED] p-3">
-              <Text className="font-poppins-light text-sm text-[#6B5B4A]">
+            <View className="mt-5 rounded-xl border border-[#FDE68A] bg-[#FFFBEB] p-3">
+              <Text className="font-poppins-light text-sm text-[#92400E]">
                 Mock Test Data
               </Text>
-              <Text className="font-poppins-regular text-sm text-[#8B6F4E]">
+              <Text className="font-poppins-regular text-sm text-[#92400E]">
                 Number: +91 {MOCK_TEST_PHONE}
               </Text>
-              <Text className="font-poppins-regular text-sm text-[#8B6F4E]">
+              <Text className="font-poppins-regular text-sm text-[#92400E]">
                 OTP: {MOCK_TEST_OTP}
               </Text>
             </View>
@@ -138,8 +138,8 @@ export function AuthScreen({
               {Array.from({ length: 6 }).map((_, index) => (
                 <View
                   key={index}
-                  className="h-12 flex-1 items-center justify-center rounded-xl border border-[#E7E1D6] bg-[#FFFCF7]">
-                  <Text className="font-syne-semibold text-[18px] text-[#1C1F2A]">
+                  className="h-12 flex-1 items-center justify-center rounded-xl border border-[#DBEAFE] bg-[#ffffff]">
+                  <Text className="font-syne-semibold text-[18px] text-[#1E3A8A]">
                     {otp[index] ?? ''}
                   </Text>
                 </View>
@@ -155,10 +155,10 @@ export function AuthScreen({
               autoFocus
             />
 
-            <Text className="mt-3 text-center font-poppins-light text-[12px] text-[#8B6F4E]">
+            <Text className="mt-3 text-center font-poppins-light text-[12px] text-[#6B7280]">
               OTP is sent to +91 {phoneNumber}
             </Text>
-            <Text className="mt-1 text-center font-poppins-medium text-[12px] text-[#0F766E]">
+            <Text className="mt-1 text-center font-poppins-medium text-[12px] text-[#EAAE1F]">
               Resend in 00:56
             </Text>
 
@@ -168,18 +168,18 @@ export function AuthScreen({
               </Text>
             ) : null}
 
-            <View className="mt-4 rounded-xl border border-[#F1E6D8] bg-[#FFF7ED] p-3">
-              <Text className="mb-[6px] font-poppins-light text-[12px] text-[#6B5B4A]">
+            <View className="mt-4 rounded-xl border border-[#FDE68A] bg-[#FFFBEB] p-3">
+              <Text className="mb-[6px] font-poppins-light text-[12px] text-[#92400E]">
                 Mock Test OTP
               </Text>
-              <Text className="font-poppins-regular text-[14px] text-[#8B6F4E]">
+              <Text className="font-poppins-regular text-[14px] text-[#92400E]">
                 Use OTP: {MOCK_TEST_OTP}
               </Text>
             </View>
 
             <Pressable
               className={`mt-4 h-14 items-center justify-center rounded-2xl ${
-                otp.length === 6 ? 'bg-[#0F766E]' : 'bg-[#D9D6D1]'
+                otp.length === 6 ? 'bg-[#1E3A8A]' : 'bg-[#C7D2FE]'
               }`}
               onPress={onVerify}>
               <Text

@@ -35,12 +35,12 @@ export function ProfileDetailsScreen({
     Alert.alert('Saved', 'Profile changes saved.');
   };
   return (
-    <View className="flex-1 bg-[#F7F4EF] px-6 py-8">
+    <View className="flex-1 bg-[#ecedff] px-6 py-8">
       <View className="flex-row items-center justify-between mb-4">
         <Pressable onPress={() => onClose && onClose()} className="py-1 px-2">
-          <Text className="text-[#0F766E]">Back</Text>
+          <Text className="text-[#1E3A8A]">Back</Text>
         </Pressable>
-        <Text className="text-2xl font-poppins-semibold">Profile</Text>
+        <Text className="text-2xl font-poppins-semibold text-[#1E3A8A]">Profile</Text>
         <View style={{ width: 48 }} />
       </View>
 
@@ -75,14 +75,14 @@ export function ProfileDetailsScreen({
 
       <Pressable
         onPress={() => handleSave()}
-        className="mb-4 h-14 items-center justify-center rounded-2xl bg-[#0F766E]">
+        className="mb-4 h-14 items-center justify-center rounded-2xl bg-[#1E3A8A]">
         <Text className="font-poppins-semibold text-white">Save</Text>
       </Pressable>
 
       <Pressable
         onPress={() => onLogout && onLogout()}
-        className="mt-auto h-14 items-center justify-center rounded-2xl bg-[#111827]">
-        <Text className="font-poppins-semibold text-white">Logout</Text>
+        className="mt-auto h-14 items-center justify-center rounded-2xl bg-[#EAAE1F]">
+        <Text className="font-poppins-semibold text-[#111827]">Logout</Text>
       </Pressable>
     </View>
   );

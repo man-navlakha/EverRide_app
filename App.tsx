@@ -298,7 +298,15 @@ function AppContent({ initialAuth }: { initialAuth: InitialAuth }) {
         );
       }
       if (activeTab === 'Services') {
-        return <ServicesScreen />;
+        return (
+          <ServicesScreen
+            onOpenProfile={() => setActiveTab('Account')}
+            onOpenPickup={(p) => {
+              setSelectedPickup(p);
+              setShowPickup(true);
+            }}
+          />
+        );
       }
       if (activeTab === 'Activity') {
         return <ActivityScreen  />;
@@ -306,6 +314,7 @@ function AppContent({ initialAuth }: { initialAuth: InitialAuth }) {
       return (
         <HomeScreen
           onOpenProfile={() => setActiveTab('Account')}
+          onOpenServices={() => setActiveTab('Services')}
           onOpenPickup={(p) => {
             setSelectedPickup(p);
             setShowPickup(true);

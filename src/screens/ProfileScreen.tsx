@@ -63,7 +63,7 @@ export function ProfileScreen({
           </View>
 
           <Section>
-            
+
             <Pressable onPress={onOpenFavourites} className="flex-row items-center justify-between">
               <View className="flex-row items-center">
                 <Text className="mr-3">🖤</Text>
@@ -149,20 +149,13 @@ export function ProfileScreen({
             </Pressable>
           </Section>
 
-          
+
         </View>
-      <View pointerEvents="none" className="absolute bottom-20 my-6 left-0 right-0 items-center justify-center">
-        <Image
-          source={require('../assets/logo.png')}
-          style={{ width: 82, height: 82, tintColor: '#000000', opacity: 0.08 }}
-          resizeMode="contain"
-        />
-        <Text className="text-[#9CA3AF] text-[11px] mt-1 font-poppins-medium">EverRide</Text>
-      </View>
       </ScrollView>
 
+
       {/* BottomBar rendered by App when logged in */}
-   
+
     </View>
   );
 }

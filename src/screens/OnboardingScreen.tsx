@@ -1,33 +1,34 @@
 import { useState } from 'react';
 import { Pressable, Text, View, Image } from 'react-native';
+import { Building2, Car, MapPin } from 'lucide-react-native';
 
 const slides = [
   {
     id: '1',
-    bgColor: '#2D35E8',
-    accentColor: '#4B54FF',
-    darkColor: '#1A1F8A',
-    emoji: '🌆',
+    bgColor: '#1E3A8A',
+    accentColor: '#3B82F6',
+    darkColor: '#1E40AF',
+    icon: 'city',
     title: 'Navigating City is\nEasy Now!',
     subtitle:
       'Experience fastest, connected ways to travel with all your options in one place.',
   },
   {
     id: '2',
-    bgColor: '#1A3BA8',
-    accentColor: '#2D55CC',
-    darkColor: '#0F2270',
-    emoji: '🚗',
+    bgColor: '#1D4ED8',
+    accentColor: '#60A5FA',
+    darkColor: '#1E3A8A',
+    icon: 'car',
     title: 'Book Rides in\nSeconds!',
     subtitle:
       'Choose from autos, cabs and bikes. Get picked up exactly where you are.',
   },
   {
     id: '3',
-    bgColor: '#0F2677',
-    accentColor: '#1A3EAA',
-    darkColor: '#071540',
-    emoji: '📍',
+    bgColor: '#1E3A8A',
+    accentColor: '#EAAE1F',
+    darkColor: '#1E40AF',
+    icon: 'pin',
     title: 'Track Every\nJourney Live!',
     subtitle:
       'Share your live location with loved ones and arrive safely every time.',
@@ -42,6 +43,16 @@ export function OnboardingScreen({ onGetStarted }: Props) {
   const [index, setIndex] = useState(0);
   const current = slides[index];
   const isLast = index === slides.length - 1;
+
+  const renderSlideIcon = () => {
+    if (current.icon === 'city') {
+      return <Building2 size={58} color="#FFFFFF" strokeWidth={2.2} />;
+    }
+    if (current.icon === 'car') {
+      return <Car size={58} color="#FFFFFF" strokeWidth={2.2} />;
+    }
+    return <MapPin size={58} color="#FFFFFF" strokeWidth={2.2} />;
+  };
 
   const handleNext = () => {
     if (!isLast) {
@@ -118,14 +129,7 @@ export function OnboardingScreen({ onGetStarted }: Props) {
         </Pressable>
       </View>
 
-      <View className="absolute top-24 left-0 right-0 z-10 items-center">
-        <Image
-          source={require('../assets/logo.png')}
-          style={{ width: 42, height: 42, tintColor: '#FFFFFF', opacity: 0.9 }}
-          resizeMode="contain"
-        />
-      </View>
-
+  
       {/* ── Illustration ── */}
       <View className="flex-1 items-center justify-center">
         {/* Outer glow ring */}
@@ -158,9 +162,7 @@ export function OnboardingScreen({ onGetStarted }: Props) {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-              <Text style={{ fontSize: 60, lineHeight: 72 }}>
-                {current.emoji}
-              </Text>
+              {renderSlideIcon()}
             </View>
           </View>
         </View>
@@ -168,7 +170,7 @@ export function OnboardingScreen({ onGetStarted }: Props) {
 
       {/* ── Bottom white card ── */}
       <View
-        className="rounded-t-[36px] bg-white px-7 pb-12 pt-8"
+        className="rounded-t-[36px] bg-[#ecedff] px-7 pb-12 pt-8"
         style={{
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -6 },
@@ -178,12 +180,12 @@ export function OnboardingScreen({ onGetStarted }: Props) {
         }}>
 
         {/* Slide counter */}
-        <Text className="mb-2 font-poppins-medium text-[13px] text-[#9CA3AF]">
+        <Text className="mb-2 font-poppins-medium text-[13px] text-[#6B7280]">
           {String(index + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}
         </Text>
 
         {/* Title */}
-        <Text className="mb-3 font-syne-bold text-[28px] leading-[38px] text-[#1E1F24]">
+        <Text className="mb-3 font-syne-bold text-[28px] leading-[38px] text-[#1E3A8A]">
           {current.title}
         </Text>
 
