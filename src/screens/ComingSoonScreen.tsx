@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Props = {
   onBack: () => void;
@@ -25,6 +26,7 @@ function ComingSoonIllustration() {
 
 export function ComingSoonScreen({ onBack, title, description }: Props) {
   return (
+    <SafeAreaView style={{ flex: 1 }} edges={['top']}>
     <View className="flex-1 bg-[#ecedff]">
       <View className="px-4 pt-5 pb-3 flex-row items-center justify-between border-b border-[#ffffff] bg-[#ecedff]">
         <View className="flex-row items-center">
@@ -48,6 +50,7 @@ export function ComingSoonScreen({ onBack, title, description }: Props) {
         </View>
       </ScrollView>
     </View>
+    </SafeAreaView>
   );
 }
 

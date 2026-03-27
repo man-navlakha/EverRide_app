@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, TextInput, Alert } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+const COLORS = {
+  gradientTop: '#F8F4ED',
+  gradientBottom: '#E8DFD1',
+  navy: '#0C1E5B',
+  gold: '#F4B000',
+  textGray: '#8A8D9F',
+};
 
 type Props = {
   phoneNumber: string;
@@ -35,22 +45,24 @@ export function ProfileDetailsScreen({
     Alert.alert('Saved', 'Profile changes saved.');
   };
   return (
-    <View className="flex-1 bg-[#ecedff] px-6 py-8">
+    <LinearGradient colors={[COLORS.gradientTop, COLORS.gradientBottom]} style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+    <View className="flex-1 px-6 py-8">
       <View className="flex-row items-center justify-between mb-4">
         <Pressable onPress={() => onClose && onClose()} className="py-1 px-2">
-          <Text className="text-[#1E3A8A]">Back</Text>
+          <Text style={{ color: COLORS.navy }}>Back</Text>
         </Pressable>
-        <Text className="text-2xl font-poppins-semibold text-[#1E3A8A]">Profile</Text>
+        <Text className="text-2xl font-poppins-semibold" style={{ color: COLORS.navy }}>Profile</Text>
         <View style={{ width: 48 }} />
       </View>
 
-      <View className="mb-4 rounded-lg bg-white p-4 shadow-sm">
-        <Text className="text-sm text-[#6B7280]">Phone</Text>
+      <View className="mb-4 rounded-lg p-4 shadow-sm" style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)' }}>
+        <Text className="text-sm" style={{ color: COLORS.textGray }}>Phone</Text>
         <Text className="mt-1 text-lg font-poppins-regular">{phoneNumber}</Text>
       </View>
 
-      <View className="mb-4 rounded-lg bg-white p-4 shadow-sm">
-        <Text className="text-sm text-[#6B7280]">Full Name</Text>
+      <View className="mb-4 rounded-lg p-4 shadow-sm" style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)' }}>
+        <Text className="text-sm" style={{ color: COLORS.textGray }}>Full Name</Text>
         <TextInput
           placeholder="Enter full name"
           placeholderTextColor="#9CA3AF"
@@ -60,8 +72,8 @@ export function ProfileDetailsScreen({
         />
       </View>
 
-      <View className="mb-6 rounded-lg bg-white p-4 shadow-sm">
-        <Text className="text-sm text-[#6B7280]">Email</Text>
+      <View className="mb-6 rounded-lg p-4 shadow-sm" style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)' }}>
+        <Text className="text-sm" style={{ color: COLORS.textGray }}>Email</Text>
         <TextInput
           placeholder="Enter email"
           placeholderTextColor="#9CA3AF"
@@ -75,16 +87,20 @@ export function ProfileDetailsScreen({
 
       <Pressable
         onPress={() => handleSave()}
-        className="mb-4 h-14 items-center justify-center rounded-2xl bg-[#1E3A8A]">
+        className="mb-4 h-14 items-center justify-center rounded-2xl"
+        style={{ backgroundColor: COLORS.navy }}>
         <Text className="font-poppins-semibold text-white">Save</Text>
       </Pressable>
 
       <Pressable
         onPress={() => onLogout && onLogout()}
-        className="mt-auto h-14 items-center justify-center rounded-2xl bg-[#EAAE1F]">
+        className="mt-auto h-14 items-center justify-center rounded-2xl"
+        style={{ backgroundColor: COLORS.gold }}>
         <Text className="font-poppins-semibold text-[#111827]">Logout</Text>
       </Pressable>
     </View>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 

@@ -5,6 +5,16 @@ import Geolocation from 'react-native-geolocation-service';
 import { MapPin, Clock3, DollarSign, Route, ArrowRight } from 'lucide-react-native';
 import { reverseMapplsLocationName, searchMapplsPlaces, type MapplsSuggestion } from '../services/mapplsPlaces';
 import { MAPPLS_CLIENT_ID, MAPPLS_CLIENT_SECRET } from '../constants/mappls';
+import LinearGradient from 'react-native-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+const COLORS = {
+  gradientTop: '#F8F4ED',
+  gradientBottom: '#E8DFD1',
+  navy: '#0C1E5B',
+  gold: '#F4B000',
+  textGray: '#8A8D9F',
+};
 
 type SuggestionItem = MapplsSuggestion;
 
@@ -421,15 +431,24 @@ export default function MultiTransportScreen({ onClose }: Props) {
   const routes = hasInputs ? buildRoutes(pickupCenter, destinationCenter) : [];
 
   return (
-    <View className="flex-1 bg-[#ecedff]">
+    <LinearGradient colors={[COLORS.gradientTop, COLORS.gradientBottom]} style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+    <View className="flex-1">
       {/* Header */}
-      <View className="px-4 pt-5 pb-3 flex-row items-center justify-between border-b border-[#ffffff] bg-[#ecedff]">
+      <View
+        className="px-4 pt-5 pb-3 flex-row items-center justify-between"
+        style={{
+          borderBottomWidth: 1,
+          borderBottomColor: 'rgba(255, 255, 255, 0.85)',
+          backgroundColor: 'rgba(255, 255, 255, 0.12)',
+        }}
+      >
         <View className="flex-row items-center">
           <Image source={require('../assets/logo.png')} style={{ width: 34, height: 34 }} resizeMode="contain" />
-          <Text className="ml-2 text-black font-syne-bold text-[22px]">EVERRIDE</Text>
+          <Text className="ml-2 font-syne-bold text-[22px]" style={{ color: COLORS.navy }}>EVERRIDE</Text>
         </View>
-        <Pressable onPress={onClose} className="w-10 h-10 rounded-full bg-white items-center justify-center">
-          <Text className="font-syne-bold text-[#111827] text-[18px]">✕</Text>
+        <Pressable onPress={onClose} className="w-10 h-10 rounded-full items-center justify-center" style={{ backgroundColor: COLORS.gold }}>
+          <Text className="font-syne-bold text-[18px]" style={{ color: COLORS.navy }}>✕</Text>
         </Pressable>
       </View>
 
@@ -437,13 +456,13 @@ export default function MultiTransportScreen({ onClose }: Props) {
         <View className="px-4 pt-4">
           {/* Search Section */}
           <View className="mb-6">
-            <Text className="text-[#1E3A8A] font-syne-bold text-[24px] mb-1">Multimode Routes</Text>
-            <Text className="text-[#6B7280] text-[13px] mb-4 font-poppins-medium">Find the best combination of transports</Text>
+            <Text className="font-syne-bold text-[24px] mb-1" style={{ color: COLORS.navy }}>Multimode Routes</Text>
+            <Text className="text-[13px] mb-4 font-poppins-medium" style={{ color: COLORS.textGray }}>Find the best combination of transports</Text>
 
             {/* Pickup Input */}
             <View className="mb-3">
               <View className="rounded-xl bg-white p-3 border border-[#E5E7EB] flex-row items-center" style={{gap: 8}}>
-                <MapPin size={18} color="#1E3A8A" />
+                <MapPin size={18} color={COLORS.navy} />
                 <TextInput
                   value={pickupLabel}
                   onChangeText={setPickupLabel}
@@ -480,7 +499,7 @@ export default function MultiTransportScreen({ onClose }: Props) {
             {/* Destination Input */}
             <View className="mb-3">
               <View className="rounded-xl bg-white p-3 border border-[#E5E7EB] flex-row items-center" style={{gap: 8}}>
-                <MapPin size={18} color="#F4BE2A" />
+                <MapPin size={18} color={COLORS.gold} />
                 <TextInput
                   value={destination}
                   onChangeText={setDestination}
@@ -608,7 +627,7 @@ export default function MultiTransportScreen({ onClose }: Props) {
             </View>
           ) : (
             <View>
-              <Text className="text-[#1E3A8A] font-syne-bold text-[18px] mb-3">{routes.length} Routes Available</Text>
+              <Text className="font-syne-bold text-[18px] mb-3" style={{ color: COLORS.navy }}>{routes.length} Routes Available</Text>
               {routes.map((route, index) => (
                 <Pressable
                   key={route.id}
@@ -667,9 +686,9 @@ export default function MultiTransportScreen({ onClose }: Props) {
 
                       <View className="flex-row items-center justify-between mt-1">
                         <Text className="text-[#6B7280] text-[12px]">Cost: {route.fare}</Text>
-                        <Pressable className="h-10 rounded-full bg-[#F4BE2A] items-center justify-center px-5 flex-row" style={{ gap: 6 }}>
-                          <Text className="text-[#1F2A44] text-[12px] font-poppins-semibold">{route.bookLabel}</Text>
-                          <ArrowRight size={12} color="#1F2A44" />
+                        <Pressable className="h-10 rounded-full items-center justify-center px-5 flex-row" style={{ gap: 6, backgroundColor: COLORS.gold }}>
+                          <Text className="text-[12px] font-poppins-semibold" style={{ color: COLORS.navy }}>{route.bookLabel}</Text>
+                          <ArrowRight size={12} color={COLORS.navy} />
                         </Pressable>
                       </View>
                     </View>
@@ -681,5 +700,7 @@ export default function MultiTransportScreen({ onClose }: Props) {
         </View>
       </ScrollView>
     </View>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }

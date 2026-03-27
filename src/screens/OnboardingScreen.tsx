@@ -1,13 +1,23 @@
 import { useState } from 'react';
 import { Pressable, Text, View, Image } from 'react-native';
 import { Building2, Car, MapPin } from 'lucide-react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+const COLORS = {
+  gradientTop: '#F8F4ED',
+  gradientBottom: '#E8DFD1',
+  navy: '#0C1E5B',
+  gold: '#F4B000',
+  textGray: '#8A8D9F',
+};
 
 const slides = [
   {
     id: '1',
-    bgColor: '#1E3A8A',
-    accentColor: '#3B82F6',
-    darkColor: '#1E40AF',
+    bgColor: '#0C1E5B',
+    accentColor: '#F4B000',
+    darkColor: '#233F89',
     icon: 'city',
     title: 'Navigating City is\nEasy Now!',
     subtitle:
@@ -15,9 +25,9 @@ const slides = [
   },
   {
     id: '2',
-    bgColor: '#1D4ED8',
-    accentColor: '#60A5FA',
-    darkColor: '#1E3A8A',
+    bgColor: '#233F89',
+    accentColor: '#F4B000',
+    darkColor: '#0C1E5B',
     icon: 'car',
     title: 'Book Rides in\nSeconds!',
     subtitle:
@@ -25,9 +35,9 @@ const slides = [
   },
   {
     id: '3',
-    bgColor: '#1E3A8A',
-    accentColor: '#EAAE1F',
-    darkColor: '#1E40AF',
+    bgColor: '#0C1E5B',
+    accentColor: '#F4B000',
+    darkColor: '#233F89',
     icon: 'pin',
     title: 'Track Every\nJourney Live!',
     subtitle:
@@ -63,7 +73,9 @@ export function OnboardingScreen({ onGetStarted }: Props) {
   };
 
   return (
-    <View className="flex-1" style={{ backgroundColor: current.bgColor }}>
+    <LinearGradient colors={[COLORS.gradientTop, COLORS.gradientBottom]} style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+    <View className="flex-1">
 
       {/* ── Decorative background blobs ── */}
       <View
@@ -115,7 +127,7 @@ export function OnboardingScreen({ onGetStarted }: Props) {
               height: 3,
               borderRadius: 3,
               backgroundColor:
-                i <= index ? '#FFFFFF' : 'rgba(255,255,255,0.30)',
+                i <= index ? current.bgColor : 'rgba(12, 30, 91, 0.20)',
             }}
           />
         ))}
@@ -138,7 +150,7 @@ export function OnboardingScreen({ onGetStarted }: Props) {
             width: 240,
             height: 240,
             borderRadius: 120,
-            backgroundColor: 'rgba(255,255,255,0.10)',
+            backgroundColor: 'rgba(12, 30, 91, 0.08)',
             alignItems: 'center',
             justifyContent: 'center',
           }}>
@@ -148,7 +160,7 @@ export function OnboardingScreen({ onGetStarted }: Props) {
               width: 180,
               height: 180,
               borderRadius: 90,
-              backgroundColor: 'rgba(255,255,255,0.14)',
+              backgroundColor: 'rgba(12, 30, 91, 0.12)',
               alignItems: 'center',
               justifyContent: 'center',
             }}>
@@ -158,11 +170,11 @@ export function OnboardingScreen({ onGetStarted }: Props) {
                 width: 120,
                 height: 120,
                 borderRadius: 60,
-                backgroundColor: 'rgba(255,255,255,0.22)',
+                backgroundColor: 'rgba(12, 30, 91, 0.18)',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-              {renderSlideIcon()}
+              {current.icon === 'city' ? <Building2 size={58} color="#FFFFFF" strokeWidth={2.2} /> : current.icon === 'car' ? <Car size={58} color="#FFFFFF" strokeWidth={2.2} /> : <MapPin size={58} color="#FFFFFF" strokeWidth={2.2} />}
             </View>
           </View>
         </View>
@@ -170,8 +182,9 @@ export function OnboardingScreen({ onGetStarted }: Props) {
 
       {/* ── Bottom white card ── */}
       <View
-        className="rounded-t-[36px] bg-[#ecedff] px-7 pb-12 pt-8"
+        className="rounded-t-[36px] px-7 pb-12 pt-8"
         style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.88)',
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -6 },
           shadowOpacity: 0.08,
@@ -180,17 +193,17 @@ export function OnboardingScreen({ onGetStarted }: Props) {
         }}>
 
         {/* Slide counter */}
-        <Text className="mb-2 font-poppins-medium text-[13px] text-[#6B7280]">
+        <Text className="mb-2 font-poppins-medium text-[13px]" style={{ color: COLORS.textGray }}>
           {String(index + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}
         </Text>
 
         {/* Title */}
-        <Text className="mb-3 font-syne-bold text-[28px] leading-[38px] text-[#1E3A8A]">
+        <Text className="mb-3 font-syne-bold text-[28px] leading-[38px]" style={{ color: COLORS.navy }}>
           {current.title}
         </Text>
 
         {/* Subtitle */}
-        <Text className="mb-8 font-poppins-regular text-[15px] leading-[26px] text-[#6B7280]">
+        <Text className="mb-8 font-poppins-regular text-[15px] leading-[26px]" style={{ color: COLORS.textGray }}>
           {current.subtitle}
         </Text>
 
@@ -225,5 +238,7 @@ export function OnboardingScreen({ onGetStarted }: Props) {
         </View>
       </View>
     </View>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }

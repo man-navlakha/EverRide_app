@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, Pressable, ActivityIndicator, Platform, Image } from 'react-native';
 import { Bus, Car, Clock3, MapPin, Repeat2, Sparkles, Train } from 'lucide-react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type RideStatus = 'Live' | 'Completed';
 
@@ -118,13 +119,16 @@ export function ActivityScreen({ onOpenProfile }: Props) {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-[#ecedff]">
-        <ActivityIndicator size="large" color="#233F89" />
-      </View>
+      <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+        <View className="flex-1 justify-center items-center bg-[#ecedff]">
+          <ActivityIndicator size="large" color="#233F89" />
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
+    <SafeAreaView style={{ flex: 1 }} edges={['top']}>
     <View className="flex-1 bg-[#ecedff]">
       <View className="px-4 pt-5 pb-3 flex-row items-center justify-between border-b border-[#ffffff] bg-[#ecedff]">
         <View className="flex-row items-center">
@@ -195,6 +199,7 @@ export function ActivityScreen({ onOpenProfile }: Props) {
         ))}
       </ScrollView>
     </View>
+    </SafeAreaView>
   );
 }
 

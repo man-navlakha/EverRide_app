@@ -1,6 +1,16 @@
 import { useEffect, useRef } from 'react';
 import { Pressable, Text, TextInput, View, Image } from 'react-native';
 import { MOCK_TEST_OTP, MOCK_TEST_PHONE } from '../constants/mockAuth';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import LinearGradient from 'react-native-linear-gradient';
+
+const COLORS = {
+  gradientTop: '#F8F4ED',
+  gradientBottom: '#E8DFD1',
+  navy: '#0C1E5B',
+  gold: '#F4B000',
+  textGray: '#8A8D9F',
+};
 
 type AuthScreenProps = {
   mode: 'phone' | 'otp';
@@ -41,7 +51,9 @@ export function AuthScreen({
   }, [isOtp]);
 
   return (
-    <View className="flex-1 bg-[#ecedff]">
+    <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+    <LinearGradient colors={[COLORS.gradientTop, COLORS.gradientBottom]} style={{ flex: 1 }}>
+    <View className="flex-1">
    
       <View className="flex-1 px-6 pt-14">
         <View className="flex-row items-center justify-between">
@@ -52,10 +64,10 @@ export function AuthScreen({
               resizeMode="contain"
             />
             <View className="ml-2">
-              <Text className="text-2xl font-syne-bold tracking-[1px] text-[#1E3A8A]">
+              <Text className="text-2xl font-syne-bold tracking-[1px]" style={{ color: COLORS.navy }}>
                 EVERRIDE
               </Text>
-              <Text className="mt-1 font-raleway-medium text-[15px] text-[#6B7280]">
+              <Text className="mt-1 font-raleway-medium text-[15px]" style={{ color: COLORS.textGray }}>
                 Every ride, on time
               </Text>
             </View>
@@ -66,16 +78,16 @@ export function AuthScreen({
        
       </View>
 
-      <View className="rounded-t-[28px] bg-white px-6 pb-10 pt-6 shadow-2xl">
+      <View className="rounded-t-[28px] px-6 pb-10 pt-6 shadow-2xl" style={{ backgroundColor: 'rgba(255, 255, 255, 0.88)' }}>
         <View className="mb-4 flex-row items-center justify-between">
           {isOtp ? (
             <Pressable onPress={onBack} className="h-8 w-8 items-center justify-center">
-              <Text className="font-syne-semibold text-[18px] text-[#1E3A8A]">←</Text>
+              <Text className="font-syne-semibold text-[18px]" style={{ color: COLORS.navy }}>←</Text>
             </Pressable>
           ) : (
             <View className="h-8 w-8" />
           )}
-          <Text className="font-syne-bold text-[28px] text-[#1E3A8A]">
+          <Text className="font-syne-bold text-[28px]" style={{ color: COLORS.navy }}>
             {isOtp ? 'OTP Verification' : 'Sign in / Sign up'}
           </Text>
           <View className="rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1">
@@ -91,7 +103,7 @@ export function AuthScreen({
                 <View className="mr-3 rounded-lg bg-[#EFF6FF] px-2 py-1">
                   
                 </View>
-                <Text className="mr-2 font-poppins-regular text-[16px] text-[#1E3A8A]">
+                <Text className="mr-2 font-poppins-regular text-[16px]" style={{ color: COLORS.navy }}>
                   +91
                 </Text>
                 <TextInput
@@ -117,7 +129,7 @@ export function AuthScreen({
             <Pressable
               onPress={onGetOtp}
               className={`h-14 items-center justify-center rounded-2xl ${
-                phoneNumber.length === 10 ? 'bg-[#1E3A8A]' : 'bg-[#C7D2FE]'
+                phoneNumber.length === 10 ? 'bg-[#0C1E5B]' : 'bg-[#C7D2FE]'
               }`}>
               <Text
                 className={`font-poppins-semibold text-[16px] ${
@@ -131,7 +143,7 @@ export function AuthScreen({
               <Text className="font-poppins-light text-sm text-[#6B7280]">
                 By continuing you agree to our Terms
               </Text>
-              <Text className="font-poppins-medium text-sm text-[#EAAE1F]">Help</Text>
+              <Text className="font-poppins-medium text-sm" style={{ color: COLORS.gold }}>Help</Text>
             </View>
 
             <View className="mt-5 rounded-xl border border-[#FDE68A] bg-[#FFFBEB] p-3">
@@ -179,7 +191,7 @@ export function AuthScreen({
             <Text className="mt-3 text-center font-poppins-light text-[12px] text-[#6B7280]">
               OTP is sent to +91 {phoneNumber}
             </Text>
-            <Text className="mt-1 text-center font-poppins-medium text-[12px] text-[#EAAE1F]">
+            <Text className="mt-1 text-center font-poppins-medium text-[12px]" style={{ color: COLORS.gold }}>
               Resend in 00:56
             </Text>
 
@@ -200,7 +212,7 @@ export function AuthScreen({
 
             <Pressable
               className={`mt-4 h-14 items-center justify-center rounded-2xl ${
-                otp.length === 6 ? 'bg-[#1E3A8A]' : 'bg-[#C7D2FE]'
+                otp.length === 6 ? 'bg-[#0C1E5B]' : 'bg-[#C7D2FE]'
               }`}
               onPress={onVerify}>
               <Text
@@ -214,5 +226,7 @@ export function AuthScreen({
         )}
       </View>
     </View>
+    </LinearGradient>
+    </SafeAreaView>
   );
 }

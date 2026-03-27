@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, Pressable, ScrollView, TextInput } from 'react-native';
 import { MAPPLS_CLIENT_ID, MAPPLS_CLIENT_SECRET } from '../constants/mappls';
 import { searchMapplsPlaces, type MapplsSuggestion } from '../services/mapplsPlaces';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Props = {
   onBack: () => void;
@@ -150,6 +151,7 @@ export function FavouritesScreen({ onBack }: Props) {
   };
 
   return (
+    <SafeAreaView style={{ flex: 1 }} edges={['top']}>
     <View className="flex-1 bg-[#ecedff]">
       <View className="px-4 pt-5 pb-3 flex-row items-center justify-between border-b border-[#ffffff] bg-[#ecedff]">
         <View className="flex-row items-center justify-between">
@@ -363,6 +365,7 @@ export function FavouritesScreen({ onBack }: Props) {
         </View>
       ) : null}
     </View>
+    </SafeAreaView>
   );
 }
 
